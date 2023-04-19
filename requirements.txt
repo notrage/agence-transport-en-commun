@@ -1,0 +1,2 @@
+sqlite3
+TO DO : view qui donne le prochain depart de chaque ligne btw je suis trop malin 

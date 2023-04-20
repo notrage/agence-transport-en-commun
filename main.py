@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 from utils import db
-
+from utils.requete import *
+import PySimpleGUI as sg
 
 def select_tous_les_conducteur(conn):
     """
@@ -20,6 +21,23 @@ def select_tous_les_conducteur(conn):
     for row in rows:
         print(row)
 
+def main_screen(conn):
+    # All the stuff inside your window.
+    layout = [  [sg.Button("Connexion en tant qu'Administrateur")],
+                [sg.Button("Connexion en tant qu'Utilisateur")],
+                [sg.Button("Déconnexion")]
+            ]
+
+    # Create the Window
+    window = sg.Window('Connection', layout)
+    # Event Loop to process "events" and get the "values" of the inputs
+    while True:
+        event, values = window.read()
+        if event == "Connexion en tant qu'Administrateur":
+            window.close()
+            Ajouter_un_conducteur(conn)
+        if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
+            break
 
 def main():
     # Nom de la BD à créer
@@ -27,14 +45,9 @@ def main():
 
     # Créer une connexion a la BD
     conn = db.creer_connexion(db_file)
+    sg.theme('DarkAmber') # GUI theme
+    main_screen(conn)
 
-    # Remplir la BD
-    print("1. On crée la bd et on l'initialise avec des premières valeurs.")
-    db.mise_a_jour_bd(conn, "data/transports_init.sql")
-    db.mise_a_jour_bd(conn, "data/transports_validvalues.sql")
-    # Lire la BD
-    print("2. Liste de tous les conducteurs")
-    select_tous_les_conducteur(conn)
 
 
 if __name__ == "__main__":

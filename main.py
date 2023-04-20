@@ -45,9 +45,13 @@ def main():
 
     # Créer une connexion a la BD
     conn = db.creer_connexion(db_file)
+    # initiation de la db 
+    db.mise_a_jour_bd(conn,"data/transports_init.sql")
+    db.mise_a_jour_bd(conn,"data/transports_init_values.sql")
     sg.theme('DarkAmber') # GUI theme
     main_screen(conn)
-
+    conn.close()
+    print("Connexion fermée")
 
 
 if __name__ == "__main__":

@@ -20,8 +20,8 @@ def Ajouter_un_conducteur(conn):
             break
         # Vérification de la validité des données
         if event == 'Valider':
+            print(values)
             mat,nom,prenom,bus,tram = values['-IMPUT_MAT-'],str(values['-IMPUT_NOM-']),str(values['-IMPUT_PRENOM-']),values['-CK_BUS-'],values['-CK_TRAM-']
-            print(values,type(nom),len(nom))
             # Matricule est un entier
             if mat.isdigit():
                 # Matricule positif
@@ -30,7 +30,19 @@ def Ajouter_un_conducteur(conn):
                     if not nom.strip() == '' and not prenom.strip() == '':
                         # Verification que bus et/ou tram est coché
                         if bus or tram:
-                            print("Ajout en cours")
+                            # Execution du SQL 
+                            cur = conn.cursor()
+                            requete = "INSERT INTO Conducteurs VALUES (" + mat +",'" + nom + "','" + prenom +"');"
+                            print(requete)
+                            cur.execute(requete)
+                            if bus: 
+                                requete = "INSERT INTO ConducteursModeles VALUES (" + mat +",'Bus');"
+                                print(requete)
+                                cur.execute(requete)
+                            if tram: 
+                                requete = "INSERT INTO ConducteursModeles VALUES (" + mat +",'Tram');"
+                                print(requete)
+                                cur.execute(requete)
                         else:
                             sg.Popup("Erreur : le conducteur doit pouvoir conduire un tram et/ou un bus")
                     else:

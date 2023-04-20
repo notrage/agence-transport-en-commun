@@ -33,11 +33,10 @@ def main_screen(conn):
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
-        if event == "Connexion en tant qu'Administrateur":
-            window.close()
-            Ajouter_un_conducteur(conn)
         if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
             break
+        if event == "Connexion en tant qu'Administrateur":
+            Ajouter_un_conducteur(conn)
 
 def main():
     # Nom de la BD à créer

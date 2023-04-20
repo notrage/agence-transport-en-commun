@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+import sqlite3
 
 def Ajouter_un_conducteur(conn):
     """
@@ -16,7 +17,7 @@ def Ajouter_un_conducteur(conn):
     window = sg.Window('ADMIN PANEL', layout)
     while True:
         event, values = window.read()
-        if event == sg.WIN_CLOSED or event == 'Annuler': # if user closes window or clicks cancel
+        if event == sg.WIN_CLOSED or event == 'Annuler': # quit
             break
         # Vérification de la validité des données
         if event == 'Valider':
@@ -34,15 +35,20 @@ def Ajouter_un_conducteur(conn):
                             cur = conn.cursor()
                             requete = "INSERT INTO Conducteurs VALUES (" + mat +",'" + nom + "','" + prenom +"');"
                             print(requete)
-                            cur.execute(requete)
-                            if bus: 
-                                requete = "INSERT INTO ConducteursModeles VALUES (" + mat +",'Bus');"
-                                print(requete)
+                            try:
                                 cur.execute(requete)
-                            if tram: 
-                                requete = "INSERT INTO ConducteursModeles VALUES (" + mat +",'Tram');"
-                                print(requete)
-                                cur.execute(requete)
+                            except sqlite3.IntegrityError:
+                                sg.Popup("Erreur : matricule non disponible")
+                            else:
+                                if bus: 
+                                    requete = "INSERT INTO ConducteursModeles VALUES (" + mat +",'Bus');"
+                                    print(requete)
+                                    cur.execute(requete)
+                                if tram: 
+                                    requete = "INSERT INTO ConducteursModeles VALUES (" + mat +",'Tram');"
+                                    print(requete)
+                                    cur.execute(requete)
+                                sg.Popup("Ajout validé !")
                         else:
                             sg.Popup("Erreur : le conducteur doit pouvoir conduire un tram et/ou un bus")
                     else:
@@ -51,5 +57,11 @@ def Ajouter_un_conducteur(conn):
                     sg.Popup("Erreur : le matricule doit être un positif")
             else:
                 sg.Popup("Erreur : le matricule doit être un nombre entier positif")
-
     window.close()
+
+def Ajouter_un_vehicule(conn):
+    """
+    Ajouter un vehicule à la DB 
+
+    :param conn: Connexion à la base de données
+    """

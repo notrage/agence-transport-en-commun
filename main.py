@@ -22,10 +22,9 @@ def select_tous_les_conducteur(conn):
         print(row)
 
 def main_screen(conn):
-    # All the stuff inside your window.
     layout = [  [sg.Button("Connexion en tant qu'Administrateur")],
                 [sg.Button("Connexion en tant qu'Utilisateur")],
-                [sg.Button("Déconnexion")]
+                [sg.Button("Quitter")]
             ]
 
     # Create the Window
@@ -33,10 +32,29 @@ def main_screen(conn):
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
-        if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
+        if event == sg.WIN_CLOSED or event == 'Quitter': # if user closes window or clicks cancel
             break
         if event == "Connexion en tant qu'Administrateur":
+            admin_panel(conn)
+
+def admin_panel(conn):
+    # All the stuff inside your window.
+    layout = [  [sg.Button("Ajouter un conducteur")],
+                [sg.Button("Ajouter un véhicule")],
+                [sg.Button("Déconnexion")]
+            ]
+    window = sg.Window('ADMIN PANEL', layout)
+    # Event Loop to process "events" and get the "values" of the inputs
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
+            break
+        if event == "Ajouter un conducteur":
             Ajouter_un_conducteur(conn)
+        if event == "Ajouter un véhicule":
+            Ajouter_un_vehicule(conn)
+    window.close()
+
 
 def main():
     # Nom de la BD à créer

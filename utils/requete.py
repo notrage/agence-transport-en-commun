@@ -11,13 +11,13 @@ def Ajouter_un_conducteur(conn):
                 [sg.Text("Nom du conducteur"),sg.Input(key='-IMPUT_NOM-')],
                 [sg.Text("Prenom du conducteur"),sg.Input(key='-IMPUT_PRENOM-')],
                 [sg.CB('Bus',key="-CK_BUS-"), sg.CB('Tram',key="-CK_TRAM-")],
-                [sg.Submit('Valider'), sg.Cancel('Annuler')]]
+                [sg.Submit('Valider'), sg.Cancel('Retour')]]
 
     # Create the window
     window = sg.Window('ADMIN PANEL', layout)
     while True:
         event, values = window.read()
-        if event == sg.WIN_CLOSED or event == 'Annuler': # quit
+        if event == sg.WIN_CLOSED or event == 'Retour': # quit
             break
         # Vérification de la validité des données
         if event == 'Valider':
@@ -65,3 +65,38 @@ def Ajouter_un_vehicule(conn):
 
     :param conn: Connexion à la base de données
     """
+    layout =   [[sg.Text("Numéro du véhicule"),sg.Input(key='-IMPUT_NUM-')],
+                [sg.Text("Nom de la ligne desservie"),sg.Input(key='-IMPUT_LIGNE-')],
+                [sg.Text("Type de véhicule"),sg.CB('Bus',key="-CK_BUS-"), sg.CB('Tram',key="-CK_TRAM-")],
+                [sg.Submit('Valider'), sg.Cancel('Retour')]]
+    window = sg.Window('ADMIN PANEL', layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Retour': # quit
+            break
+        # Vérification de la validité des données
+        if event == 'Valider':
+            print(values)
+            num,ligne,bus,tram = values['-IMPUT_NUM-'],values['-IMPUT_LIGNE-'],values['-CK_BUS-'],values['-CK_TRAM-']
+            if num.isdigit() and int(num) > 0:
+                if not ligne.strip() == '':
+                    if (bus or tram) and not (bus and tram):
+                        cur = conn.cursor()
+                        if bus:
+                            requete = "INSERT INTO Vehicules VALUES (" + num +",'Bus','" + ligne + "');"
+                        if tram:
+                            requete = "INSERT INTO Vehicules VALUES (" + num +",'Tram','" + ligne + "');"
+                        print(requete)
+                        try:
+                            cur.execute(requete)
+                        except sqlite3.IntegrityError:
+                            sg.popup("Erreur : le numéro de véhicule n'est pas disponible et/ou la ligne n'existe pas.")
+                        else:
+                            sg.Popup("Ajout validé !")
+                    else:
+                        sg.Popup("Erreur : le véhicule doit être un bus OU un tram")
+                else:
+                    sg.Popup("Erreur : le nom de la ligne ne doit pas être vide")
+            else:
+                sg.Popup("Erreur : le numéro du vehicule doit être un nombre positif")
+    window.close()

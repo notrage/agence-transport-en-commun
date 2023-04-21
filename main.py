@@ -2,7 +2,13 @@
 
 from utils import db
 from utils.requete import *
-import PySimpleGUI as sg
+import os 
+try:
+    import PySimpleGUI as sg
+except:
+    print("ATTENTION : vous n'avez pas la librairie PySimpleGUI")
+    print("py -m pip install pysimplegui")
+
 
 def select_tous_les_conducteur(conn):
     """

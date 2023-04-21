@@ -49,6 +49,8 @@ def main():
     db.mise_a_jour_bd(conn,"data/transports_init_values.sql")
     sg.theme('DarkAmber') # GUI theme
     main_screen(conn)
+    conn.commit()
+    print("Données mises à jour")
     conn.close()
     print("Connexion fermée")
 

@@ -9,32 +9,19 @@ except:
     print("ATTENTION : vous n'avez pas la librairie PySimpleGUI")
     print("py -m pip install pysimplegui")
 
+############################### GLOBAL VALUES ##################################
+size=(400, 300)
 
-def select_tous_les_conducteur(conn):
-    """
-    Affiche la liste de tous les bateaux.
 
-    :param conn: Connexion à la base de données
-    """
-    cur = conn.cursor()
-    cur.execute("""
-                SELECT * 
-                FROM Etapes
-                """)
-
-    rows = cur.fetchall()
-
-    for row in rows:
-        print(row)
-
-def main_screen(conn):
-    layout = [  [sg.Button("Connexion en tant qu'Administrateur")],
-                [sg.Button("Connexion en tant qu'Utilisateur")],
-                [sg.Button("Quitter")]
+def main_screen(conn:sqlite3.Connection):
+    layout = [  [sg.Button("Connexion en tant qu'Administrateur",size=(50,1))],
+                [sg.Button("Connexion en tant qu'Utilisateur",size=(50,1))],
+                [sg.Text("",size=(0,1))],
+                [sg.Button("Quitter",size=(15,1),pad=((5,0), (155, 10)))]
             ]
 
     # Create the Window
-    window = sg.Window('Connection', layout)
+    window = sg.Window('Connection', layout,size=size)
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
@@ -43,13 +30,14 @@ def main_screen(conn):
         if event == "Connexion en tant qu'Administrateur":
             admin_panel(conn)
 
-def admin_panel(conn):
+def admin_panel(conn:sqlite3.Connection):
     # All the stuff inside your window.
-    layout = [  [sg.Button("Ajouter un conducteur")],
-                [sg.Button("Ajouter un véhicule")],
-                [sg.Button("Déconnexion")]
+    layout = [  [sg.Button("Visualiser une table",size=(50,1))],
+                [sg.Button("Ajouter un conducteur",size=(50,1))],
+                [sg.Button("Ajouter un véhicule",size=(50,1))],
+                [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (150, 10)))]
             ]
-    window = sg.Window('ADMIN PANEL', layout)
+    window = sg.Window('ADMIN PANEL', layout,size=size)
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
@@ -59,6 +47,8 @@ def admin_panel(conn):
             Ajouter_un_conducteur(conn)
         if event == "Ajouter un véhicule":
             Ajouter_un_vehicule(conn)
+        if event == "Visualiser une table":
+            Afficher_table_menu(conn)
     window.close()
 
 
@@ -71,12 +61,15 @@ def main():
     # initiation de la db 
     db.mise_a_jour_bd(conn,"data/transports_init.sql")
     db.mise_a_jour_bd(conn,"data/transports_init_values.sql")
-    sg.theme('DarkAmber') # GUI theme
+
+    # theme des UI
+    sg.theme('DarkAmber')
+    
     main_screen(conn)
     conn.commit()
     print("Données mises à jour")
     conn.close()
-    print("Connexion fermée")
+    print("Connection fermée")
 
 
 if __name__ == "__main__":

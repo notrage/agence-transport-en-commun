@@ -14,6 +14,11 @@ size=(400, 300)
 
 
 def main_screen(conn:sqlite3.Connection):
+    """
+    Menu de base
+
+    :param conn: Connexion à la base de données
+    """
     layout = [  [sg.Button("Connexion en tant qu'Administrateur",size=(50,1))],
                 [sg.Button("Connexion en tant qu'Utilisateur",size=(50,1))],
                 [sg.Text("",size=(0,1))],
@@ -21,7 +26,7 @@ def main_screen(conn:sqlite3.Connection):
             ]
 
     # Create the Window
-    window = sg.Window('Connection', layout,size=size)
+    window = sg.Window('LOGIN', layout,size=size)
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
@@ -29,8 +34,16 @@ def main_screen(conn:sqlite3.Connection):
             break
         if event == "Connexion en tant qu'Administrateur":
             admin_panel(conn)
+        if event == "Connexion en tant qu'Utilisateur":
+            user_panel(conn)
+    window.close()
 
 def admin_panel(conn:sqlite3.Connection):
+    """
+    Menu administrateur
+
+    :param conn: Connexion à la base de données
+    """
     # All the stuff inside your window.
     layout = [  [sg.Button("Visualiser une table",size=(50,1))],
                 [sg.Button("Ajouter un conducteur",size=(50,1))],
@@ -49,6 +62,26 @@ def admin_panel(conn:sqlite3.Connection):
             Ajouter_un_vehicule(conn)
         if event == "Visualiser une table":
             Afficher_table_menu(conn)
+    window.close()
+
+def user_panel(conn:sqlite3.Connection):
+    """
+    Menu utilisateur
+
+    :param conn: Connexion à la base de données
+    """
+    # All the stuff inside your window.
+    layout = [  [sg.Button("...",size=(50,1))],
+                [sg.Button("...",size=(50,1))],
+                [sg.Button("...",size=(50,1))],
+                [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (150, 10)))]
+            ]
+    window = sg.Window('USER', layout,size=size)
+        # Event Loop to process "events" and get the "values" of the inputs
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
+            break
     window.close()
 
 

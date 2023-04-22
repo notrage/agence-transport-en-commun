@@ -11,7 +11,7 @@ def Ajouter_un_conducteur(conn:sqlite3.Connection):
     layout =   [[sg.Text("Matricule du conducteur",size=(20,1)),sg.Input(key='-IMPUT_MAT-')],
                 [sg.Text("Nom du conducteur",size=(20,1)),sg.Input(key='-IMPUT_NOM-')],
                 [sg.Text("Prenom du conducteur",size=(20,1)),sg.Input(key='-IMPUT_PRENOM-')],
-                [sg.CB('Bus',key="-CK_BUS-"), sg.CB('Tram',key="-CK_TRAM-")],
+                [sg.Text("Peut conduire",size=(20,1)),sg.CB('Bus',key="-CK_BUS-"), sg.CB('Tram',key="-CK_TRAM-")],
                 [sg.Submit('Valider',size=(15,1),pad=((5,0), (150, 10))), sg.Cancel('Retour',size=(15,1),pad=((5,0), (150, 10)))]]
 
     # Create the window
@@ -68,7 +68,7 @@ def Ajouter_un_vehicule(conn:sqlite3.Connection):
     """
     layout =   [[sg.Text("Numéro du véhicule",size=(20,1)),sg.Input(key='-IMPUT_NUM-')],
                 [sg.Text("Nom de la ligne desservie",size=(20,1)),sg.Input(key='-IMPUT_LIGNE-')],
-                [sg.Text("Type de véhicule",size=(20,1)),sg.CB('Bus',key="-CK_BUS-"), sg.CB('Tram',key="-CK_TRAM-")],
+                [sg.Text("Type de véhicule",size=(20,1)),sg.Radio('Bus','R1',key="-CK_BUS-"), sg.Radio('Tram','R1',key="-CK_TRAM-")],
                 [sg.Text("",size=(0,1))],
                 [sg.Submit('Valider',size=(15,1),pad=((5,0), (150, 10))), sg.Cancel('Retour',size=(15,1),pad=((5,0), (150, 10)))]]
     window = sg.Window('ADMIN PANEL', layout,size=(400, 300))
@@ -126,20 +126,19 @@ def Afficher_table_menu(conn:sqlite3.Connection):
         if event == sg.WIN_CLOSED or event == 'Retour': # quit
             break
         elif event != None:
-            Afficher_table(conn,event)
+            requete = "SELECT * FROM " + event + ";"
+            Afficher_table(conn,requete)
     window.close()
 
 
-def Afficher_table(conn:sqlite3.Connection,nom_table: str):
+def Afficher_table(conn:sqlite3.Connection,requete: str):
     """
-    Affiche la table nom_table
+    Affiche la table obtenu par la requete
 
     :param conn: Connexion à la base de données
-    :param nom_table: Nom de la table à afficher
+    :param requete: requete à executer
     """
     cur = conn.cursor()
-    requete = "SELECT * FROM " + nom_table + ";"
-    print(requete)
     cur.execute(requete)
     rows = cur.fetchall()
     # Récuperation des noms des attributs
@@ -154,7 +153,7 @@ def Afficher_table(conn:sqlite3.Connection,nom_table: str):
                         auto_size_columns=True)],
               [sg.Button("Retour")]]
 
-    window = sg.Window(nom_table, layout)
+    window = sg.Window("RESULT", layout)
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == 'Retour': # quit

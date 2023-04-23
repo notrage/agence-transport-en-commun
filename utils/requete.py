@@ -131,7 +131,7 @@ def Afficher_table_menu(conn:sqlite3.Connection):
     window.close()
 
 
-def Afficher_table(conn:sqlite3.Connection,requete: str):
+def Afficher_table(conn:sqlite3.Connection,requete: str) -> None:
     """
     Affiche la table obtenu par la requete
 
@@ -160,7 +160,7 @@ def Afficher_table(conn:sqlite3.Connection,requete: str):
             break
     window.close()
 
-def Supprimer_une_valeur(conn:sqlite3.Connection,table:str):
+def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
     """
     Affiche une table et permet d'en surpprimer les valeurs. 
     Dans le cas ou la table a des attributs dependants d'autres table,
@@ -168,6 +168,8 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str):
 
     :param conn: Connexion à la base de données
     :param table: nom de la table. 
+
+    :return bool: Indique si il faut recharger la page pour mettre à jour les données en cas de supression.
     """
     "Recuperation des donnees"
     cur = conn.cursor()
@@ -211,6 +213,16 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str):
                 # Mise à jour visuelle
                 window.close()
                 return True
-
+        if table == "Vehicules" and event[0] == '-TABLE-' and event[2][0] != None and event[2][0] >= 0:
+            popup_str = "Voulez-vous supprimer la ligne du véhicule numéro " + string_data[event[2][0]][0] + " ?"
+            button = sg.popup(popup_str, button_type=1)
+            if button == 'Yes':
+                # DELETE Vehicules
+                requete = "DELETE FROM Vehicules WHERE numero_vehicule == " + string_data[event[2][0]][0] + ";"
+                print(requete)
+                cur.execute(requete)
+                # Mise à jour visuelle
+                window.close()
+                return True
     window.close()
     return False 

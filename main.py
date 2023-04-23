@@ -49,7 +49,8 @@ def admin_panel(conn:sqlite3.Connection):
                 [sg.Button("Ajouter un conducteur",size=(50,1))],
                 [sg.Button("Supprimer un conducteur",size=(50,1))],
                 [sg.Button("Ajouter un véhicule",size=(50,1))],
-                [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (125, 10)))]
+                [sg.Button("Supprimer un véhicule",size=(50,1))],
+                [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (90, 10)))]
             ]
     window = sg.Window('ADMIN PANEL', layout,size=size)
     # Event Loop to process "events" and get the "values" of the inputs
@@ -61,10 +62,14 @@ def admin_panel(conn:sqlite3.Connection):
             Ajouter_un_conducteur(conn)
         if event == "Supprimer un conducteur":
             relancer = Supprimer_une_valeur(conn,"Conducteurs")
-            if relancer:
-                Supprimer_une_valeur(conn,"Conducteurs")
+            while relancer:
+                relancer = Supprimer_une_valeur(conn,"Conducteurs")
         if event == "Ajouter un véhicule":
             Ajouter_un_vehicule(conn)
+        if event == "Supprimer un véhicule":
+            relancer = Supprimer_une_valeur(conn,"Vehicules")
+            while relancer:
+                relancer = Supprimer_une_valeur(conn,"Vehicules")
         if event == "Visualiser une table":
             Afficher_table_menu(conn)
         
@@ -99,7 +104,7 @@ def main():
     conn = db.creer_connexion(db_file)
     # initiation de la db 
     db.mise_a_jour_bd(conn,"data/transports_init.sql")
-    db.mise_a_jour_bd(conn,"data/transports_init_values.sql")
+    db.mise_a_jour_bd(conn, "data/transports_mtag_values.sql")
 
     # theme des UI
     sg.theme('DarkAmber')

@@ -99,7 +99,8 @@ def main():
     conn = db.creer_connexion(db_file)
     # initiation de la db 
     db.mise_a_jour_bd(conn,"data/transports_init.sql")
-    db.mise_a_jour_bd(conn,"data/transports_init_values.sql")
+    db.mise_a_jour_bd(conn, "data/insert_mtag.sql")
+    #db.mise_a_jour_bd(conn,"data/transports_init_values.sql")
 
     # theme des UI
     sg.theme('DarkAmber')

@@ -159,3 +159,58 @@ def Afficher_table(conn:sqlite3.Connection,requete: str):
         if event == sg.WIN_CLOSED or event == 'Retour': # quit
             break
     window.close()
+
+def Supprimer_une_valeur(conn:sqlite3.Connection,table:str):
+    """
+    Affiche une table et permet d'en surpprimer les valeurs. 
+    Dans le cas ou la table a des attributs dependants d'autres table,
+    ces differentes valeurs sont supprimées aussi. 
+
+    :param conn: Connexion à la base de données
+    :param table: nom de la table. 
+    """
+    "Recuperation des donnees"
+    cur = conn.cursor()
+    requete = "SELECT * FROM " + table + ";"
+    cur.execute(requete)
+    rows = cur.fetchall()
+    # Récuperation des noms des attributs
+    header = [col[0] for col in cur.description]
+    # Formatage des données
+    data = [list(t) for t in rows]
+    string_data = [[str(element) for element in row] for row in data]
+    layout = [[sg.Text("Cliquez sur la ligne à supprimer")],
+        [sg.Table(values = string_data,
+                    headings=header,
+                    justification='center',
+                    font=("_",12),
+                    key='-TABLE-',
+                    enable_click_events=True,
+                    auto_size_columns=True)],
+            [sg.Button("Retour")]]
+    
+    window = sg.Window("RESULT", layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Retour': # quit
+            break
+        
+        # Supprimer un conducteur de Conducteurs et ModelesConducteurs
+        if table == "Conducteurs" and event[0] == '-TABLE-' and event[2][0] != None and event[2][0] >= 0:
+            popup_str = "Voulez-vous supprimer la ligne de matricule " + string_data[event[2][0]][0] + " ? \n\nLa suppression sera aussi effective dans la ligne ConducteursModeles."
+            button = sg.popup(popup_str, button_type=1)
+            if button == 'Yes':
+                # DELETE ConducteursModeles
+                requete = "DELETE FROM ConducteursModeles WHERE matricule_conducteur == " + string_data[event[2][0]][0] + ";"
+                print(requete)
+                cur.execute(requete)
+                # DELETE Conducteurs
+                requete = "DELETE FROM Conducteurs WHERE matricule_conducteur == " + string_data[event[2][0]][0] + ";"
+                print(requete)
+                cur.execute(requete)
+                # Mise à jour visuelle
+                window.close()
+                return True
+
+    window.close()
+    return False 

@@ -47,8 +47,9 @@ def admin_panel(conn:sqlite3.Connection):
     # All the stuff inside your window.
     layout = [  [sg.Button("Visualiser une table",size=(50,1))],
                 [sg.Button("Ajouter un conducteur",size=(50,1))],
+                [sg.Button("Supprimer un conducteur",size=(50,1))],
                 [sg.Button("Ajouter un véhicule",size=(50,1))],
-                [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (150, 10)))]
+                [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (125, 10)))]
             ]
     window = sg.Window('ADMIN PANEL', layout,size=size)
     # Event Loop to process "events" and get the "values" of the inputs
@@ -58,10 +59,15 @@ def admin_panel(conn:sqlite3.Connection):
             break
         if event == "Ajouter un conducteur":
             Ajouter_un_conducteur(conn)
+        if event == "Supprimer un conducteur":
+            relancer = Supprimer_une_valeur(conn,"Conducteurs")
+            if relancer:
+                Supprimer_une_valeur(conn,"Conducteurs")
         if event == "Ajouter un véhicule":
             Ajouter_un_vehicule(conn)
         if event == "Visualiser une table":
             Afficher_table_menu(conn)
+        
     window.close()
 
 def user_panel(conn:sqlite3.Connection):

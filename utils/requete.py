@@ -237,6 +237,6 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
             button = sg.popup(popup_str, button_type=1)
             if button == 'Yes':
                 # DELETE Etapes + Décalage des etapes concernées 
-                
+                return
     window.close()
     return False 

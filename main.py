@@ -107,6 +107,7 @@ def admin_panel(conn:sqlite3.Connection):
             Afficher_table_menu(conn) 
             window.UnHide()  
     window.close()
+    
 
 def Afficher_table_menu(conn:sqlite3.Connection):
     """

@@ -103,31 +103,39 @@ def Ajouter_un_vehicule(conn:sqlite3.Connection):
                 sg.Popup("Erreur : le numéro du vehicule doit être un nombre positif")
     window.close()
 
-
-def Afficher_table_menu(conn:sqlite3.Connection):
+def Ajouter_un_arret(conn:sqlite3.Connection):
     """
-    Menu d'affichage des tables de la DB
+    Formulaire pour creer un nouvel arret
 
     :param conn: Connexion à la base de données
     """
-    layout =  [[sg.Button("Conducteurs",size=(50,1))],
-                [sg.Button("Modeles",size=(50,1))],
-                [sg.Button("Tarifs",size=(50,1))],
-                [sg.Button("Lignes",size=(50,1))],
-                [sg.Button("Arrets",size=(50,1))],
-                [sg.Button("Vehicules",size=(50,1))],
-                [sg.Button("Etapes",size=(50,1))],
-                [sg.Button("ConducteursModeles",size=(50,1))],
-                [sg.Text("")],
-                [sg.Button("Retour",size=(15,1),pad=((5,0), (70, 10)))]]
-    window = sg.Window('ADMIN PANEL', layout,size=(400, 400))
+    layout =    [[sg.Text("Nom de l'arret",size=(20,1)),sg.Input(key='-IMPUT_NOM-')],
+                [sg.Text("Adresse de l'arret*",size=(20,1)),sg.Input(key='-IMPUT_ADR-')],
+                [sg.Text("* Entrez le nom de la place/rue où se trouve l'arrêt, \nconsulter les arrêts déjà existant en cas de doutes",font=("_",8))],
+                [sg.Submit('Valider',size=(15,1),pad=((5,0), (160, 10))), sg.Cancel('Retour',size=(15,1),pad=((5,0), (160, 10)))]]
+    window = sg.Window('ADMIN PANEL', layout,size=(400, 300))
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == 'Retour': # quit
             break
-        elif event != None:
-            requete = "SELECT * FROM " + event + ";"
-            Afficher_table(conn,requete)
+        if event == 'Valider':
+            print(values)
+            nom,adr = values["-IMPUT_NOM-"],values["-IMPUT_ADR-"]
+            if not nom.strip() == '':
+                if not adr.strip() == '':
+                    cur = conn.cursor()
+                    requete = f'INSERT INTO Arrets VALUES ("{nom}","{adr}");'
+                    print(requete)
+                    try:
+                        cur.execute(requete)
+                    except sqlite3.IntegrityError:
+                        sg.popup("Erreur : l'arrêt existe déjà.")
+                    else:
+                        sg.Popup("Ajout validé !")
+                else:
+                    sg.Popup("Erreur :  l'adresse ne doit pas être vide")
+            else:
+                sg.Popup("Erreur : le nom de l'arrêt de doit pas être vide")
     window.close()
 
 
@@ -224,5 +232,11 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
                 # Mise à jour visuelle
                 window.close()
                 return True
+        if table == "Arrets" and event[0] == '-TABLE-' and event[2][0] != None and event[2][0] >= 0:
+            popup_str = "Voulez-vous supprimer l'arret " + string_data[event[2][0]][0] + " ?\nCela affectera les étapes des lignes concernées par l'arrêt."
+            button = sg.popup(popup_str, button_type=1)
+            if button == 'Yes':
+                # DELETE Etapes + Décalage des etapes concernées 
+                
     window.close()
     return False 

@@ -1,13 +1,15 @@
 #!/usr/bin/python3
 
-from utils import db
-from utils.requete import *
-import os 
 try:
     import PySimpleGUI as sg
 except:
     print("ATTENTION : vous n'avez pas la librairie PySimpleGUI")
     print("py -m pip install pysimplegui")
+    exit()
+
+from utils import db
+from utils.requete import *
+import os 
 
 ############################### GLOBAL VALUES ##################################
 size=(400, 300)
@@ -33,9 +35,13 @@ def main_screen(conn:sqlite3.Connection):
         if event == sg.WIN_CLOSED or event == 'Quitter': # if user closes window or clicks cancel
             break
         if event == "Connexion en tant qu'Administrateur":
+            window.hide()
             admin_panel(conn)
+            window.UnHide()
         if event == "Connexion en tant qu'Utilisateur":
+            window.hide()
             user_panel(conn)
+            window.UnHide()
     window.close()
 
 def admin_panel(conn:sqlite3.Connection):
@@ -61,25 +67,45 @@ def admin_panel(conn:sqlite3.Connection):
         if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
             break
         if event == "Ajouter un conducteur":
+            window.Hide()
             Ajouter_un_conducteur(conn)
+            window.UnHide()
         if event == "Supprimer un conducteur":
+            window.Hide()
             relancer = Supprimer_une_valeur(conn,"Conducteurs")
+            window.UnHide()
             while relancer:
+                window.Hide()
                 relancer = Supprimer_une_valeur(conn,"Conducteurs")
+                window.UnHide()
         if event == "Ajouter un véhicule":
+            window.Hide()
             Ajouter_un_vehicule(conn)
+            window.UnHide()
         if event == "Supprimer un véhicule":
+            window.Hide()
             relancer = Supprimer_une_valeur(conn,"Vehicules")
+            window.UnHide()
             while relancer:
+                window.Hide()
                 relancer = Supprimer_une_valeur(conn,"Vehicules")
+                window.UnHide()
         if event == "Ajouter un arrêt":
+            window.Hide()
             Ajouter_un_arret(conn)
+            window.UnHide()
         if event == "Supprimer un arrêt":
+            window.Hide()
             relancer = Supprimer_une_valeur(conn,"Arrets")
+            window.UnHide()
             while relancer:
+                window.Hide()
                 relancer = Supprimer_une_valeur(conn,"Arrets")
+                window.UnHide()
         if event == "Visualiser une table":
-            Afficher_table_menu(conn)   
+            window.Hide()
+            Afficher_table_menu(conn) 
+            window.UnHide()  
     window.close()
 
 def Afficher_table_menu(conn:sqlite3.Connection):
@@ -105,7 +131,9 @@ def Afficher_table_menu(conn:sqlite3.Connection):
             break
         elif event != None:
             requete = "SELECT * FROM " + event + ";"
+            window.Hide()
             Afficher_table(conn,requete)
+            window.UnHide()
     window.close()
 
 

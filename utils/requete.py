@@ -22,7 +22,6 @@ def Ajouter_un_conducteur(conn:sqlite3.Connection):
             break
         # Vérification de la validité des données
         if event == 'Valider':
-            print(values)
             mat,nom,prenom,bus,tram = values['-IMPUT_MAT-'],str(values['-IMPUT_NOM-']),str(values['-IMPUT_PRENOM-']),values['-CK_BUS-'],values['-CK_TRAM-']
             # Matricule est un entier
             if mat.isdigit():
@@ -78,14 +77,13 @@ def Ajouter_un_vehicule(conn:sqlite3.Connection):
             break
         # Vérification de la validité des données
         if event == 'Valider':
-            print(values)
             num,ligne,bus,tram = values['-IMPUT_NUM-'],values['-IMPUT_LIGNE-'],values['-CK_BUS-'],values['-CK_TRAM-']
             if num.isdigit() and int(num) > 0:
                 if not ligne.strip() == '':
                     if (bus or tram) and not (bus and tram):
                         cur = conn.cursor()
                         if bus:
-                            requete = "INSERT INTO Vehicules VALUES (" + num +",'Bus','" + ligne + "');"
+                            requete = f"INSERT INTO Vehicules VALUES ({num},'Bus','{ligne}');"
                         if tram:
                             requete = "INSERT INTO Vehicules VALUES (" + num +",'Tram','" + ligne + "');"
                         print(requete)
@@ -207,7 +205,7 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
         
         # Supprimer un conducteur de Conducteurs et ModelesConducteurs
         if table == "Conducteurs" and event[0] == '-TABLE-' and event[2][0] != None and event[2][0] >= 0:
-            popup_str = "Voulez-vous supprimer la ligne de matricule " + string_data[event[2][0]][0] + " ? \n\nLa suppression sera aussi effective dans la ligne ConducteursModeles."
+            popup_str = "Voulez-vous supprimer la ligne de matricule " + string_data[event[2][0]][0] + " ? \n\nLa suppression sera aussi effective dans la table ConducteursModeles."
             button = sg.popup(popup_str, button_type=1)
             if button == 'Yes':
                 # DELETE ConducteursModeles

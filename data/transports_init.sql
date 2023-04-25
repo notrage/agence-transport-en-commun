@@ -4,8 +4,9 @@ DROP TABLE IF EXISTS Vehicules;
 DROP TABLE IF EXISTS Tarifs;
 DROP TABLE IF EXISTS Conducteurs;
 DROP TABLE IF EXISTS Modeles;
-DROP TABLE IF EXISTS Lignes;
+DROP TABLE IF EXISTS LignesBase;
 DROP TABLE IF EXISTS Arrets;
+DROP VIEW IF EXISTS Lignes;
 
 CREATE TABLE Conducteurs (
     matricule_conducteur INTEGER PRIMARY KEY,
@@ -38,17 +39,11 @@ CREATE TABLE Arrets (
     adresse_arret TEXT NOT NULL
 );
 
-CREATE TABLE Lignes (
+CREATE TABLE LignesBase (
     nom_ligne TEXT PRIMARY KEY NOT NULL,
     premier_depart_ligne DATE NOT NULL,
     dernier_depart_ligne DATE NOT NULL,
     minute_intervalle_ligne INT NOT NULL,
-    depart_ligne TEXT,
-    arrive_ligne TEXT,
-    CONSTRAINT FK_lignes_depart FOREIGN KEY (depart_ligne)
-        REFERENCES Arrets(nom_arret),
-    CONSTRAINT FK_lignes_arret FOREIGN KEY (arrive_ligne)
-        REFERENCES Arrets(nom_arret),
     CONSTRAINT CK_lignes_intervalle CHECK (minute_intervalle_ligne > 0),
     CONSTRAINT CK_lignes_premierdep CHECK (premier_depart_ligne >= TIME('05:00:00'))
     CONSTRAINT CK_lignes_dernierdep CHECK (dernier_depart_ligne <= TIME('23:00:00'))
@@ -61,7 +56,7 @@ CREATE TABLE Vehicules (
     CONSTRAINT FK_vehicules_type FOREIGN KEY (type_modele)
         REFERENCES Modeles(type_modele),
     CONSTRAINT FK_vehicules_ligne FOREIGN KEY (nom_ligne)
-        REFERENCES Lignes(nom_ligne),
+        REFERENCES LignesBase(nom_ligne),
     CONSTRAINT CK_vehicules_num CHECK (numero_vehicule > 0)
 );
 
@@ -71,7 +66,7 @@ CREATE TABLE Etapes (
     rang_etape INT,
     CONSTRAINT PK_etapes_lignearret PRIMARY KEY (nom_ligne,nom_arret),
     CONSTRAINT FK_etapes_ligne FOREIGN KEY (nom_ligne)
-        REFERENCES Lignes(nom_ligne),
+        REFERENCES LignesBase(nom_ligne),
     CONSTRAINT FK_etapes_arret FOREIGN KEY (nom_arret)
         REFERENCES Arrets(nom_arret),
     CONSTRAINT CK_etapes_rang CHECK (rang_etape > 0)
@@ -86,3 +81,16 @@ CREATE TABLE ConducteursModeles(
     CONSTRAINT FK_conducteurmodele_type FOREIGN KEY (type_modele)
         REFERENCES Modeles(type_modele)   
 );
+
+CREATE VIEW Lignes AS 
+WITH LigneRangMax AS (
+    SELECT nom_ligne, MAX(rang_etape) AS rang_max
+    FROM Etapes
+    GROUP BY nom_ligne ),
+DernierArretParLigne AS (
+    SELECT E.nom_ligne, nom_arret AS arrive_ligne
+    FROM Etapes E 
+    JOIN LigneRangMax L ON (E.nom_ligne = L.nom_ligne AND rang_etape = rang_max))
+SELECT nom_ligne, premier_depart_ligne, dernier_depart_ligne, minute_intervalle_ligne, nom_arret AS depart_ligne,D.arrive_ligne AS arrive_ligne
+FROM LignesBase JOIN Etapes USING(nom_ligne) JOIN DernierArretParLigne D USING(nom_ligne)
+WHERE rang_etape = 1;

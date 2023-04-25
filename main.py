@@ -8,11 +8,7 @@ except:
     exit()
 
 from utils import db
-from utils.requete import *
-import os 
-
-############################### GLOBAL VALUES ##################################
-size=(400, 300)
+from utils.formulaire import *
 
 
 def main_screen(conn:sqlite3.Connection):
@@ -23,12 +19,12 @@ def main_screen(conn:sqlite3.Connection):
     """
     layout = [  [sg.Button("Connexion en tant qu'Administrateur",size=(50,1))],
                 [sg.Button("Connexion en tant qu'Utilisateur",size=(50,1))],
-                [sg.Text("",size=(0,1))],
-                [sg.Button("Quitter",size=(15,1),pad=((5,0), (155, 10)))]
+                [sg.Text("")],
+                [sg.Button("Quitter",size=(15,1))]
             ]
 
     # Create the Window
-    window = sg.Window('LOGIN', layout,size=size)
+    window = sg.Window('LOGIN', layout)
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
@@ -58,9 +54,10 @@ def admin_panel(conn:sqlite3.Connection):
                 [sg.Button("Supprimer un véhicule",size=(50,1))],
                 [sg.Button("Ajouter un arrêt",size=(50,1))],
                 [sg.Button("Supprimer un arrêt",size=(50,1))],
-                [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (125, 10)))]
+                [sg.Text("")],
+                [sg.Button("Déconnexion",size=(15,1))]
             ]
-    window = sg.Window('ADMIN PANEL', layout,size=(400,400))
+    window = sg.Window('ADMIN PANEL', layout)
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
@@ -99,7 +96,7 @@ def admin_panel(conn:sqlite3.Connection):
             relancer = Supprimer_une_valeur(conn,"Arrets")
             window.UnHide()
             while relancer:
-                window.Hide()
+                window.Hide()                                                                                                                                                                                                                                       
                 relancer = Supprimer_une_valeur(conn,"Arrets")
                 window.UnHide()
         if event == "Visualiser une table":
@@ -107,7 +104,10 @@ def admin_panel(conn:sqlite3.Connection):
             Afficher_table_menu(conn) 
             window.UnHide()  
     window.close()
+
+
     
+
 
 def Afficher_table_menu(conn:sqlite3.Connection):
     """
@@ -124,8 +124,8 @@ def Afficher_table_menu(conn:sqlite3.Connection):
                 [sg.Button("Etapes",size=(50,1))],
                 [sg.Button("ConducteursModeles",size=(50,1))],
                 [sg.Text("")],
-                [sg.Button("Retour",size=(15,1),pad=((5,0), (70, 10)))]]
-    window = sg.Window('ADMIN PANEL', layout,size=(400, 400))
+                [sg.Button("Retour",size=(15,1))]]
+    window = sg.Window('ADMIN PANEL', layout)
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == 'Retour': # quit

@@ -27,8 +27,8 @@ INSERT INTO Arrets VALUES ("Hotel de Ville", "Boulevard Jean Pain");
 INSERT INTO Arrets VALUES ("Gustave Rivet", "Boulevard Marechal Joffre");
 INSERT INTO Arrets VALUES ("Foch-Ferrie", "Boulevard Marechal Foch");
 
-INSERT INTO Lignes VALUES ('A', "06:30:00", "22:30:00", 5, "Victor Hugo", "MC2 Maison de la Culture");
-INSERT INTO Lignes VALUES ('C', "05:45:00", "22:45:00", 7, "Flandrin Valmy", "Foch-Ferrie");
+INSERT INTO Lignes VALUES ('A', "06:30:00", "22:30:00", 5);
+INSERT INTO Lignes VALUES ('C', "05:45:00", "22:45:00", 7);
 
 INSERT INTO Vehicules VALUES (1, "Tram", 'A');
 INSERT INTO Vehicules VALUES (2, "Tram", 'A');

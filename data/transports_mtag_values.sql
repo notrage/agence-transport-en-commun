@@ -260,16 +260,16 @@ INSERT INTO Arrets VALUES ("Les Alpilles", "Rue des Universites");
 INSERT INTO Arrets VALUES ("Universites Biologie", "Avenue Centrale");
 
 /* Creation des lignes */
-INSERT INTO Lignes VALUES ('A', "05:00:00", "23:00:00", 3, "L'Etoile", "La Poya");
-INSERT INTO Lignes VALUES ('B', "05:00:00", "23:00:00", 5, "Plaine des Sports", "Oxford");
-INSERT INTO Lignes VALUES ('C', "05:00:00", "23:00:00", 5, "Le Prisme", "Condillac - Universites");
-INSERT INTO Lignes VALUES ('D', "05:15:00", "22:45:00", 7, "Etienne Grappe", "Les Taillees - Universites");
-INSERT INTO Lignes VALUES ('E', "05:15:00", "22:45:00", 7, "Louise Michel", "Palluel");
-INSERT INTO Lignes VALUES ("C1", "05:30:00", "22:30:00", 5, "Pre de l'Eau", "Cite Jean Mace");
-INSERT INTO Lignes VALUES ("C2", "05:30:00", "22:30:00", 5, "Pont Rouge", "Louise Michel");
-INSERT INTO Lignes VALUES ("C3", "06:00:00", "22:00:00", 7, "Centre du Graphisme", "Victor Hugo");
-INSERT INTO Lignes VALUES ("C4", "06:00:00", "22:00:00", 7, "Victor Hugo", "Le Verderet");
-INSERT INTO Lignes VALUES ("C5", "05:15:00", "22:35:00", 7, "Plaine des Sports", "Universites Biologie");
+INSERT INTO LignesBase VALUES ('A', "05:00:00", "23:00:00", 3);
+INSERT INTO LignesBase VALUES ('B', "05:00:00", "23:00:00", 5);
+INSERT INTO LignesBase VALUES ('C', "05:00:00", "23:00:00", 5);
+INSERT INTO LignesBase VALUES ('D', "05:15:00", "22:45:00", 7);
+INSERT INTO LignesBase VALUES ('E', "05:15:00", "22:45:00", 7);
+INSERT INTO LignesBase VALUES ("C1", "05:30:00", "22:30:00", 5);
+INSERT INTO LignesBase VALUES ("C2", "05:30:00", "22:30:00", 5);
+INSERT INTO LignesBase VALUES ("C3", "06:00:00", "22:00:00", 7);
+INSERT INTO LignesBase VALUES ("C4", "06:00:00", "22:00:00", 7);
+INSERT INTO LignesBase VALUES ("C5", "05:15:00", "22:35:00", 7);
 
 
 /* Creation des vehicules */

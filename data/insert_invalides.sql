@@ -30,16 +30,8 @@ INSERT INTO Tarifs VALUES (2, "Bus", 3, -1);
 
 /* Lignes */
 -- CK_lignes_intervalle
-INSERT INTO Lignes VALUES ('A', "06:30:00", "22:30:00", 0, "Victor Hugo", "MC2 Maison de la Culture");
-INSERT INTO Lignes VALUES ('C', "05:45:00", "22:45:00", -1, "Flandrin Valmy", "Foch-Ferrié");
-
--- CK_lignes_premierdep
-INSERT INTO Lignes VALUES ('A', "04:30:00", "22:30:00", 0, "Victor Hugo", "MC2 Maison de la Culture");
-INSERT INTO Lignes VALUES ('C', "04:59:59", "22:45:00", -1, "Flandrin Valmy", "Foch-Ferrié");
-
--- CK_lignes_dernierdep
-INSERT INTO Lignes VALUES ('A', "06:30:00", "23:30:00", 0, "Victor Hugo", "MC2 Maison de la Culture");
-INSERT INTO Lignes VALUES ('C', "05:45:00", "23:00:01", -1, "Flandrin Valmy", "Foch-Ferrié");
+INSERT INTO Lignes VALUES ('A', "06:30:00", "22:30:00", 0);
+INSERT INTO Lignes VALUES ('C', "05:45:00", "22:45:00", -1);
 
 
 /* Vehicules */

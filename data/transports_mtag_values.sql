@@ -143,8 +143,8 @@ INSERT INTO Arrets VALUES ("Hector Berlioz - Universites", "Rue des Residences")
 -- Arrets de la ligne D
 INSERT INTO Arrets VALUES ("Etienne Grappe", "Rue Henri Wallon");
 INSERT INTO Arrets VALUES ("Parc Jo Blanchon", "Avenue Elise Grappe");
-INSERT INTO Arrets VALUES ("Edouard Vaillant", "Avenue Benoot Frachon");
-INSERT INTO Arrets VALUES ("Maison Communale", "Avenue Benoot Frachon");
+INSERT INTO Arrets VALUES ("Edouard Vaillant", "Avenue Benoit Frachon");
+INSERT INTO Arrets VALUES ("Maison Communale", "Avenue Benoit Frachon");
 
 -- Arrets de la ligne E
 INSERT INTO Arrets VALUES ("Louise Michel", "Avenue Ronsard");

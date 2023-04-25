@@ -54,6 +54,7 @@ def admin_panel(conn:sqlite3.Connection):
                 [sg.Button("Supprimer un véhicule",size=(50,1))],
                 [sg.Button("Ajouter un arrêt",size=(50,1))],
                 [sg.Button("Supprimer un arrêt",size=(50,1))],
+                [sg.Button("Réinitialiser la base de données",size=(50,1))],
                 [sg.Text("")],
                 [sg.Button("Déconnexion",size=(15,1))]
             ]
@@ -103,6 +104,10 @@ def admin_panel(conn:sqlite3.Connection):
             window.Hide()
             Afficher_table_menu(conn) 
             window.UnHide()  
+        if event == "Réinitialiser la base de données":
+            db.mise_a_jour_bd(conn,"data/transports_init.sql")
+            db.mise_a_jour_bd(conn, "data/transports_mtag_values.sql")
+            sg.popup("La base de donnée est bien réinitialisée")
     window.close()
 
 
@@ -165,10 +170,6 @@ def main():
 
     # Créer une connexion a la BD
     conn = db.creer_connexion(db_file)
-    # initiation de la db 
-    db.mise_a_jour_bd(conn,"data/transports_init.sql")
-    db.mise_a_jour_bd(conn, "data/transports_mtag_values.sql")
-    #db.mise_a_jour_bd(conn,"data/transports_init_values.sql")
 
     # theme des UI
     sg.theme('DarkAmber')

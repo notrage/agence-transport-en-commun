@@ -58,6 +58,7 @@ def Ajouter_un_conducteur(conn:sqlite3.Connection):
                             print(requete)
                             cur.execute(requete)
                         sg.Popup("Ajout validé !")
+                        conn.commit()
                 else:
                     sg.Popup("Erreur : le conducteur doit pouvoir conduire un tram et/ou un bus")
             else:
@@ -108,6 +109,7 @@ def Ajouter_un_vehicule(conn:sqlite3.Connection):
                         sg.popup("Erreur : le numéro de véhicule n'est pas disponible et/ou la ligne n'existe pas.")
                     else:
                         sg.Popup("Ajout validé !")
+                        conn.commit()
                 else:
                     sg.Popup("Erreur : le véhicule doit être un bus OU un tram")
             else:
@@ -144,6 +146,7 @@ def Ajouter_un_arret(conn:sqlite3.Connection):
                         sg.popup("Erreur : l'arrêt existe déjà.")
                     else:
                         sg.Popup("Ajout validé !")
+                        conn.commit()
                 else:
                     sg.Popup("Erreur :  l'adresse ne doit pas être vide")
             else:
@@ -230,6 +233,7 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
                 requete = "DELETE FROM Conducteurs WHERE matricule_conducteur == " + string_data[event[2][0]][0] + ";"
                 print(requete)
                 cur.execute(requete)
+                conn.commit()
                 # Mise à jour visuelle
                 window.close()
                 return True
@@ -242,6 +246,7 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
                 print(requete)
                 cur.execute(requete)
                 # Mise à jour visuelle
+                conn.commit()
                 window.close()
                 return True
         if table == "Arrets" and event[0] == '-TABLE-' and event[2][0] != None and event[2][0] >= 0:
@@ -275,6 +280,7 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
                                 WHERE nom_arret == "{nom_arret}";"""
                 print(requete)
                 cur.execute(requete)    
+                conn.commit()
                 window.close()
                 return True
     window.close()

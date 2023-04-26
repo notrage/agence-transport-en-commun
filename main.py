@@ -106,7 +106,7 @@ def admin_panel(conn:sqlite3.Connection):
             window.UnHide()  
         if event == "Réinitialiser la base de données":
             db.mise_a_jour_bd(conn,"data/transports_init.sql")
-            db.mise_a_jour_bd(conn, "data/transports_mtag_values.sql")
+            db.mise_a_jour_bd(conn, "data/transports_init_values.sql")
             sg.popup("La base de donnée est bien réinitialisée")
     window.close()
 

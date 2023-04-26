@@ -54,7 +54,10 @@ def admin_panel(conn:sqlite3.Connection):
                 [sg.Button("Supprimer un véhicule",size=(50,1))],
                 [sg.Button("Ajouter un arrêt",size=(50,1))],
                 [sg.Button("Supprimer un arrêt",size=(50,1))],
+                [sg.Button("Modifier une ligne",size=(50,1))],
+                [sg.Text("")],
                 [sg.Button("Réinitialiser la base de données",size=(50,1))],
+
                 [sg.Text("")],
                 [sg.Button("Déconnexion",size=(15,1))]
             ]
@@ -71,11 +74,9 @@ def admin_panel(conn:sqlite3.Connection):
         if event == "Supprimer un conducteur":
             window.Hide()
             relancer = Supprimer_une_valeur(conn,"Conducteurs")
-            window.UnHide()
             while relancer:
-                window.Hide()
                 relancer = Supprimer_une_valeur(conn,"Conducteurs")
-                window.UnHide()
+            window.UnHide()
         if event == "Ajouter un véhicule":
             window.Hide()
             Ajouter_un_vehicule(conn)
@@ -83,11 +84,9 @@ def admin_panel(conn:sqlite3.Connection):
         if event == "Supprimer un véhicule":
             window.Hide()
             relancer = Supprimer_une_valeur(conn,"Vehicules")
-            window.UnHide()
             while relancer:
-                window.Hide()
                 relancer = Supprimer_une_valeur(conn,"Vehicules")
-                window.UnHide()
+            window.UnHide()
         if event == "Ajouter un arrêt":
             window.Hide()
             Ajouter_un_arret(conn)
@@ -95,18 +94,20 @@ def admin_panel(conn:sqlite3.Connection):
         if event == "Supprimer un arrêt":
             window.Hide()
             relancer = Supprimer_une_valeur(conn,"Arrets")
-            window.UnHide()
-            while relancer:
-                window.Hide()                                                                                                                                                                                                                                       
+            while relancer:                                                                                                                                                                                                                                     
                 relancer = Supprimer_une_valeur(conn,"Arrets")
-                window.UnHide()
+            window.UnHide()
         if event == "Visualiser une table":
             window.Hide()
             Afficher_table_menu(conn) 
             window.UnHide()  
+        if event == "Modifier une ligne":
+            window.Hide()
+            Modifier_une_ligne(conn)
+            window.UnHide()  
         if event == "Réinitialiser la base de données":
             db.mise_a_jour_bd(conn,"data/transports_init.sql")
-            db.mise_a_jour_bd(conn, "data/transports_init_values.sql")
+            db.mise_a_jour_bd(conn, "data/transports_mtag_values.sql")
             sg.popup("La base de donnée est bien réinitialisée")
     window.close()
 
@@ -155,7 +156,7 @@ def user_panel(conn:sqlite3.Connection):
                 [sg.Button("...",size=(50,1))],
                 [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (150, 10)))]
             ]
-    window = sg.Window('USER', layout,size=size)
+    window = sg.Window('USER', layout)
         # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()

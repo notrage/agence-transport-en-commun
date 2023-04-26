@@ -194,7 +194,7 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
 
     :return bool: Indique si il faut recharger la page pour mettre à jour les données en cas de supression.
     """
-    "Recuperation des donnees"
+    # Récuperation des données
     cur = conn.cursor()
     requete = "SELECT * FROM " + table + ";"
     cur.execute(requete)
@@ -285,3 +285,190 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
                 return True
     window.close()
     return False 
+
+def Supprimer_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
+    """
+    Affiche la table des etapes relative a la ligne nom_ligne 
+    et permet de supprimer une etape en decalant tout les rang
+
+    :param conn: Connexion à la base de données
+    :param nom_ligne: nom de la ligne. 
+
+    :return bool: Indique si il faut recharger la page pour mettre à jour les données en cas de supression.
+    """
+    # Récuperation des arret de la ligne voulue
+    cur = conn.cursor()
+    requete = f"""
+                SELECT nom_arret,rang_etape
+                FROM Etapes 
+                WHERE nom_ligne = "{nom_ligne}"
+                ORDER BY rang_etape;"""
+    print(requete)
+    cur.execute(requete)
+    rows = cur.fetchall()
+    # Récuperation des noms des attributs
+    header = [col[0] for col in cur.description]
+    # Formatage des données
+    data = [list(t) for t in rows]
+    string_data = [[str(element) for element in row] for row in data]
+    layout = [[sg.Text("Cliquez sur la ligne à supprimer")],
+        [sg.Table(values = string_data,
+                    headings=header,
+                    justification='center',
+                    font=("_",12),
+                    key='-TABLE-',
+                    enable_click_events=True,
+                    auto_size_columns=True)],
+            [sg.Button("Retour")]]
+    
+    window = sg.Window("RESULT", layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Retour': # quit
+            break
+        if event[0] == '-TABLE-' and event[2][0] != None and event[2][0] >= 0:
+            nom_arret = string_data[event[2][0]][0]
+            rang_etape = string_data[event[2][0]][1]
+            popup_str = f"Voulez-vous supprimer l'arret {nom_arret} de la ligne {nom_ligne} ?"
+            button = sg.popup(popup_str, button_type=1)
+            if button == 'Yes':
+                requete = f"""  
+                                UPDATE Etapes 
+                                SET rang_etape = rang_etape - 1 
+                                WHERE nom_ligne == "{nom_ligne}" AND rang_etape > {rang_etape};"""
+                print(requete)
+                cur.execute(requete)
+                requete = f"""  
+                                DELETE FROM Etapes 
+                                WHERE nom_arret == "{nom_arret}" AND nom_ligne == "{nom_ligne}";"""
+                print(requete)
+                cur.execute(requete)
+                conn.commit()
+                window.close()
+                return True
+    window.close()
+    return False
+
+def Ajouter_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
+    """
+    Affiche la table de la liste des arret disponible poru la ligne, et permet de chosir un rang à cet arrêt
+    :param conn: Connexion à la base de données
+    :param nom_ligne: nom de la ligne. 
+
+    :return bool: Indique si il faut recharger la page pour mettre à jour les données en cas d'ajout.
+    """
+    cur = conn.cursor()
+    # Récuperer le rang d'etape max de la ligne
+    requete = f"""  SELECT MAX(rang_etape)
+                    FROM Etapes
+                    WHERE nom_ligne = "{nom_ligne}";
+                """
+    print(requete)
+    cur.execute(requete)
+    rang_max = cur.fetchall()[0][0]
+    # Récuperer les arrêts disponibles
+    
+    requete = f"""
+                    SELECT nom_arret 
+                    FROM Arrets
+                    EXCEPT
+                    SELECT nom_arret
+                    FROM Etapes
+                    WHERE nom_ligne = "{nom_ligne}";
+                """
+
+    print(requete)
+    cur.execute(requete)
+    rows = cur.fetchall()
+    # Récuperation des noms des attributs
+    header = [col[0] for col in cur.description]
+    # Formatage des données
+    data = [list(t) for t in rows]
+    string_data = [[str(element) for element in row] for row in data]
+    layout = [  [sg.Text("Sélectionnez l'arrêt à ajouter")],
+                [sg.Table(values = string_data,
+                    headings=header,
+                    justification='center',
+                    font=("_",12),
+                    key='-TABLE-',
+                    enable_events=True,
+                    auto_size_columns=True)],
+                [sg.Text("Rang de l'etape:") ,sg.Combo([str(x) for x in range(1,rang_max+2)],default_value='1',size=(5,1),key='-RANG-')],
+                [sg.Submit('Valider',size=(10,1)), sg.Cancel('Retour',size=(10,1))]]
+    window = sg.Window("RESULT", layout)
+    while True:
+        event, values = window.read()
+        print(event)
+        if event == sg.WIN_CLOSED or event == 'Retour': # quit
+            break
+        if event == "Valider":
+            if values['-TABLE-'] != []:
+                if values['-RANG-'].isdigit() and int(values['-RANG-']) >= 1 and int(values['-RANG-']) <= rang_max+1:
+                    nom_arret = string_data[values['-TABLE-'][0]][0]
+                    rang_etape = values['-RANG-']
+                    requete = f"""
+                                UPDATE Etapes 
+                                SET rang_etape = rang_etape + 1 
+                                WHERE nom_ligne == "{nom_ligne}" AND rang_etape >= {rang_etape};"""
+                    print(requete)
+                    cur.execute(requete)
+                    requete = f"""
+                                INSERT INTO Etapes VALUES ("{nom_ligne}","{nom_arret}",{rang_etape});"""
+                    print(requete)
+                    cur.execute(requete)
+                    conn.commit()
+                    sg.popup("Ajout validé !")
+                else:
+                    sg.popup("Le rang doit être un entier de la liste proposée")
+            else:
+                sg.popup("Séléctionnez l'arrêt à ajouter")
+    window.close()
+
+def Modifier_une_ligne(conn:sqlite3.Connection):
+    cur = conn.cursor()
+    requete = """
+                    SELECT nom_ligne 
+                    FROM Lignes;"""
+    cur.execute(requete)
+    rows = cur.fetchall()
+    ligne_liste = [x[0] for x in rows]
+    layout = [[]]
+    key_list = []
+    for ligne in ligne_liste:
+        key_list.append(ligne)
+        layout[0].append(sg.Radio(ligne,"R1",key=ligne))
+    layout+=[[sg.Radio("Ajouter un arrêt","R2",key="ADD"), sg.Radio("Supprimer un arrêt","R2",key="DEL")],
+            [sg.Text("")],
+            [sg.Submit('Valider',size=(15,1)), sg.Cancel('Retour',size=(15,1))]]
+    window = sg.Window("MODIFIER UNE LIGNE", layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Retour': # quit
+            break
+        if event == "Valider":
+            ligne,commande = None, None 
+            for key,val in values.items():
+                if val and key in key_list:
+                    ligne = key
+                elif val:
+                    commande = key
+            if not ligne:
+                sg.popup("Selectionnez une ligne")
+            elif not commande:
+                sg.popup("Selectionnez une action à effectuer")
+            else:
+                if commande == "DEL":
+                    window.Hide()
+                    relancer = Supprimer_etape_ligne(conn,ligne)
+                    while relancer:
+                        relancer = Supprimer_etape_ligne(conn,ligne)
+                    window.UnHide()  
+                else:
+                    window.Hide()
+                    relancer = Ajouter_etape_ligne(conn,ligne)
+                    while relancer:
+                        relancer = Ajouter_etape_ligne(conn,ligne)
+                    window.UnHide()  
+
+    window.close()
+    

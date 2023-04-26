@@ -115,7 +115,7 @@ INSERT INTO Arrets VALUES ("Les Taillees - Universites", "Rue de la Houille Blan
 INSERT INTO Arrets VALUES ("Grand Sablon", "Avenue du grand Sablon");
 INSERT INTO Arrets VALUES ("Michallon", "Allee du Noyer d'Amerique");
 INSERT INTO Arrets VALUES ("Hopital", "Avenue des Marquis du Gresivaudan");
-INSERT INTO Arrets VALUES ("ole Verte", "Place Docteur Girard");
+INSERT INTO Arrets VALUES ("Ile Verte", "Place Docteur Girard");
 INSERT INTO Arrets VALUES ("Notre-Dame Musee", "Rue Frederic Taulier");
 INSERT INTO Arrets VALUES ("Ste-Claire - Les Halles", "Rue Jean-François Hache");
 INSERT INTO Arrets VALUES ("Palais de Justice Gare", "Rue Pierre Semard");
@@ -370,7 +370,7 @@ INSERT INTO Etapes VALUES ('B', "Les Taillees - Universites", 7);
 INSERT INTO Etapes VALUES ('B', "Grand Sablon", 8);
 INSERT INTO Etapes VALUES ('B', "Michallon", 9);
 INSERT INTO Etapes VALUES ('B', "Hopital", 10);
-INSERT INTO Etapes VALUES ('B', "ole Verte", 11);
+INSERT INTO Etapes VALUES ('B', "Ile Verte", 11);
 INSERT INTO Etapes VALUES ('B', "Notre-Dame Musee", 12);
 INSERT INTO Etapes VALUES ('B', "Ste-Claire - Les Halles", 13);
 INSERT INTO Etapes VALUES ('B', "Hubert Dubedout - Maison du Tourisme", 14);

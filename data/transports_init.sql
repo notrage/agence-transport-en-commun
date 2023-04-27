@@ -114,6 +114,6 @@ WITH LignesTemps AS (
 	LigneProchainDepart AS (
 	SELECT nom_ligne,interval_en_sec - ((actual_time_en_sec - depart_en_sec) % interval_en_sec) AS prochain_depart_en_sec, interval_en_sec
 	FROM LignesTemps)
-SELECT nom_ligne,nom_arret,rang_etape ,((prochain_depart_en_sec + 2 * 60 * rang_etape) / 60) % minute_intervalle_ligne AS prochain_depart_en_minute
+SELECT nom_ligne,nom_arret,rang_etape ,((prochain_depart_en_sec + 2 * 60 * (rang_etape - 1)) / 60) % minute_intervalle_ligne AS prochain_depart_en_minute
 FROM LigneProchainDepart JOIN EtapesBase USING(nom_ligne) JOIN Lignes USING(nom_ligne)
 ORDER BY nom_ligne, rang_etape;

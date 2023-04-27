@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS Etapes;
+DROP TABLE IF EXISTS EtapesBase;
 DROP TABLE IF EXISTS ConducteursModeles;
 DROP TABLE IF EXISTS Vehicules;
 DROP TABLE IF EXISTS Tarifs;
@@ -7,6 +7,8 @@ DROP TABLE IF EXISTS Modeles;
 DROP TABLE IF EXISTS LignesBase;
 DROP TABLE IF EXISTS Arrets;
 DROP VIEW IF EXISTS Lignes;
+DROP VIEW IF EXISTS Etapes;
+
 
 CREATE TABLE Conducteurs (
     matricule_conducteur INTEGER PRIMARY KEY,
@@ -60,16 +62,16 @@ CREATE TABLE Vehicules (
     CONSTRAINT CK_vehicules_num CHECK (numero_vehicule > 0)
 );
 
-CREATE TABLE Etapes (
+CREATE TABLE EtapesBase (
     nom_ligne TEXT,
     nom_arret TEXT,
     rang_etape INT,
-    CONSTRAINT PK_etapes_lignearret PRIMARY KEY (nom_ligne,nom_arret),
-    CONSTRAINT FK_etapes_ligne FOREIGN KEY (nom_ligne)
+    CONSTRAINT PK_etapesBase_lignearret PRIMARY KEY (nom_ligne,nom_arret),
+    CONSTRAINT FK_etapesBase_ligne FOREIGN KEY (nom_ligne)
         REFERENCES LignesBase(nom_ligne),
-    CONSTRAINT FK_etapes_arret FOREIGN KEY (nom_arret)
+    CONSTRAINT FK_etapesBase_arret FOREIGN KEY (nom_arret)
         REFERENCES Arrets(nom_arret),
-    CONSTRAINT CK_etapes_rang CHECK (rang_etape > 0)
+    CONSTRAINT CK_etapesBase_rang CHECK (rang_etape > 0)
 );
 
 CREATE TABLE ConducteursModeles(
@@ -82,15 +84,36 @@ CREATE TABLE ConducteursModeles(
         REFERENCES Modeles(type_modele)   
 );
 
+-- View pour afficher l'arrêt de départ et de fin de chaque ligne
 CREATE VIEW Lignes AS 
 WITH LigneRangMax AS (
     SELECT nom_ligne, MAX(rang_etape) AS rang_max
-    FROM Etapes
+    FROM EtapesBase
     GROUP BY nom_ligne ),
 DernierArretParLigne AS (
     SELECT E.nom_ligne, nom_arret AS arrive_ligne
-    FROM Etapes E 
+    FROM EtapesBase E 
     JOIN LigneRangMax L ON (E.nom_ligne = L.nom_ligne AND rang_etape = rang_max))
 SELECT nom_ligne, premier_depart_ligne, dernier_depart_ligne, minute_intervalle_ligne, nom_arret AS depart_ligne,D.arrive_ligne AS arrive_ligne
-FROM LignesBase JOIN Etapes USING(nom_ligne) JOIN DernierArretParLigne D USING(nom_ligne)
+FROM LignesBase JOIN EtapesBase USING(nom_ligne) JOIN DernierArretParLigne D USING(nom_ligne)
 WHERE rang_etape = 1;
+
+-- View pour afficher le prochain départ de chaque étape
+CREATE VIEW Etapes AS 
+WITH LignesTemps AS (
+	SELECT 
+		nom_ligne,
+		CAST(strftime('%H', premier_depart_ligne) AS INTEGER) * (60*60) +
+		CAST(strftime('%M', premier_depart_ligne) AS INTEGER) * 60 +
+		CAST(strftime('%S', premier_depart_ligne) AS INTEGER) AS depart_en_sec,
+		CAST(strftime('%H', 'now', 'localtime') AS INTEGER) * (60*60) +
+		CAST(strftime('%M', 'now', 'localtime') AS INTEGER) * 60 +
+		CAST(strftime('%S', 'now', 'localtime') AS INTEGER) AS actual_time_en_sec,
+		minute_intervalle_ligne * 60 AS interval_en_sec
+	FROM lignes),
+	LigneProchainDepart AS (
+	SELECT nom_ligne,interval_en_sec - ((actual_time_en_sec - depart_en_sec) % interval_en_sec) AS prochain_depart_en_sec, interval_en_sec
+	FROM LignesTemps)
+SELECT nom_ligne,nom_arret,rang_etape ,((prochain_depart_en_sec + 2 * 60 * rang_etape) / 60) % minute_intervalle_ligne AS prochain_depart_en_minute
+FROM LigneProchainDepart JOIN EtapesBase USING(nom_ligne) JOIN Lignes USING(nom_ligne)
+ORDER BY nom_ligne, rang_etape;

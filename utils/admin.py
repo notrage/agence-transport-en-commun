@@ -127,7 +127,7 @@ def Ajouter_un_arret(conn:sqlite3.Connection):
                 [sg.Text("* Entrez le nom de la place/rue où se trouve l'arrêt, \nconsulter les arrêts déjà existant en cas de doutes",font=("_",8))],
                 [sg.Text("")],
                 [sg.Submit('Valider',size=(15,1)), sg.Cancel('Retour',size=(15,1))]]
-    window = sg.Window('ADMIN PANEL', layout,size=(400, 300))
+    window = sg.Window('ADMIN PANEL', layout)
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == 'Retour': # quit
@@ -265,13 +265,13 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
                 # Décalage des numéros d'etapes sur chaque ligne
                 for (ligne,etape) in rows:
                     requete = f"""  
-                                    UPDATE Etapes 
+                                    UPDATE EtapesBase 
                                     SET rang_etape = rang_etape - 1 
                                     WHERE nom_ligne == "{ligne}" AND rang_etape > {etape};"""
                     print(requete)
                     cur.execute(requete)
                 requete = f"""  
-                                DELETE FROM Etapes 
+                                DELETE FROM EtapesBase 
                                 WHERE nom_arret == "{nom_arret}";"""
                 print(requete)
                 cur.execute(requete)
@@ -285,6 +285,7 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
                 return True
     window.close()
     return False 
+
 
 def Supprimer_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
     """
@@ -333,13 +334,13 @@ def Supprimer_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
             button = sg.popup(popup_str, button_type=1)
             if button == 'Yes':
                 requete = f"""  
-                                UPDATE Etapes 
+                                UPDATE EtapesBase
                                 SET rang_etape = rang_etape - 1 
                                 WHERE nom_ligne == "{nom_ligne}" AND rang_etape > {rang_etape};"""
                 print(requete)
                 cur.execute(requete)
                 requete = f"""  
-                                DELETE FROM Etapes 
+                                DELETE FROM EtapesBase 
                                 WHERE nom_arret == "{nom_arret}" AND nom_ligne == "{nom_ligne}";"""
                 print(requete)
                 cur.execute(requete)
@@ -407,22 +408,25 @@ def Ajouter_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
                     nom_arret = string_data[values['-TABLE-'][0]][0]
                     rang_etape = values['-RANG-']
                     requete = f"""
-                                UPDATE Etapes 
+                                UPDATE EtapesBase 
                                 SET rang_etape = rang_etape + 1 
                                 WHERE nom_ligne == "{nom_ligne}" AND rang_etape >= {rang_etape};"""
                     print(requete)
                     cur.execute(requete)
                     requete = f"""
-                                INSERT INTO Etapes VALUES ("{nom_ligne}","{nom_arret}",{rang_etape});"""
+                                INSERT INTO EtapesBase VALUES ("{nom_ligne}","{nom_arret}",{rang_etape});"""
                     print(requete)
                     cur.execute(requete)
                     conn.commit()
                     sg.popup("Ajout validé !")
+                    window.close()
+                    return True 
                 else:
                     sg.popup("Le rang doit être un entier de la liste proposée")
             else:
                 sg.popup("Séléctionnez l'arrêt à ajouter")
     window.close()
+    return False
 
 def Modifier_une_ligne(conn:sqlite3.Connection):
     cur = conn.cursor()
@@ -472,3 +476,6 @@ def Modifier_une_ligne(conn:sqlite3.Connection):
 
     window.close()
     
+
+
+

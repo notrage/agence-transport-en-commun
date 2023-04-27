@@ -8,8 +8,8 @@ except:
     exit()
 
 from utils import db
-from utils.formulaire import *
-
+from utils.admin import *
+from utils.user import *
 
 def main_screen(conn:sqlite3.Connection):
     """
@@ -151,7 +151,7 @@ def user_panel(conn:sqlite3.Connection):
     :param conn: Connexion à la base de données
     """
     # All the stuff inside your window.
-    layout = [  [sg.Button("...",size=(50,1))],
+    layout = [  [sg.Button("Trouver un parcours",size=(50,1))],
                 [sg.Button("...",size=(50,1))],
                 [sg.Button("...",size=(50,1))],
                 [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (150, 10)))]
@@ -162,6 +162,8 @@ def user_panel(conn:sqlite3.Connection):
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
             break
+        if event == "Trouver un parcours":
+            Trouver_un_chemin(conn,"L'Etoile","Odyssee")
     window.close()
 
 

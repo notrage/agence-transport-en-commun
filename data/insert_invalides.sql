@@ -40,7 +40,7 @@ INSERT INTO Vehicules VALUES (0, "Tram", 'A');
 INSERT INTO Vehicules VALUES (-1, "Bus", 'C1');
 
 
-/* Etapes */
--- CK_etapes_rang
-INSERT INTO Etapes VALUES ('A', "Victor Hugo", 0);
-INSERT INTO Etapes VALUES ('C', "Chavant", -1);
+/* EtapesBase */
+-- CK_etapesBase_rang
+INSERT INTO EtapesBase VALUES ('A', "Victor Hugo", 0);
+INSERT INTO EtapesBase VALUES ('C', "Chavant", -1);

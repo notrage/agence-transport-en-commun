@@ -163,7 +163,7 @@ def user_panel(conn:sqlite3.Connection):
         if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
             break
         if event == "Trouver un parcours":
-            Trouver_un_chemin(conn,"L'Etoile","Odyssee")
+            Trouver_un_chemin(conn)
     window.close()
 
 

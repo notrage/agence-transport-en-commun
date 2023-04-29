@@ -162,6 +162,7 @@ def Afficher_table(conn:sqlite3.Connection,requete: str) -> None:
     :param requete: requete à executer
     """
     cur = conn.cursor()
+    print(requete)
     cur.execute(requete)
     rows = cur.fetchall()
     # Récuperation des noms des attributs

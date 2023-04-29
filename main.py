@@ -11,6 +11,7 @@ from utils import db
 from utils.admin import *
 from utils.user import *
 
+
 def main_screen(conn:sqlite3.Connection):
     """
     Menu de base
@@ -112,8 +113,6 @@ def admin_panel(conn:sqlite3.Connection):
     window.close()
 
 
-    
-
 
 def Afficher_table_menu(conn:sqlite3.Connection):
     """
@@ -152,7 +151,7 @@ def user_panel(conn:sqlite3.Connection):
     """
     # All the stuff inside your window.
     layout = [  [sg.Button("Trouver un parcours",size=(50,1))],
-                [sg.Button("...",size=(50,1))],
+                [sg.Button("Informations sur un arrêt",size=(50,1))],
                 [sg.Button("...",size=(50,1))],
                 [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (150, 10)))]
             ]
@@ -163,7 +162,13 @@ def user_panel(conn:sqlite3.Connection):
         if event == sg.WIN_CLOSED or event == 'Déconnexion': # if user closes window or clicks cancel
             break
         if event == "Trouver un parcours":
+            window.Hide()
             Trouver_un_chemin(conn)
+            window.UnHide()
+        if event == "Informations sur un arrêt":
+            window.Hide()
+            Information_sur_un_arret(conn)
+            window.UnHide()
     window.close()
 
 

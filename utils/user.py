@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 import sqlite3
+from utils.admin import *
 
 class ArretNodes:
     def  __init__(self, arret, ligne):
@@ -31,7 +32,12 @@ class File:
     def est_vide(self):
         return self.curseur == len(self.file)
 
-def Trouver_un_chemin(conn):
+def Trouver_un_chemin(conn:sqlite3.Connection):
+    """
+    Formulaire de selection de 2 arrêt afin de trouver un parcours entre
+
+    :param conn: Connexion à la base de données
+    """
     cur = conn.cursor()
     # récuperation de la liste des arrêts et de leurs adresses 
     requete = """
@@ -85,6 +91,12 @@ def Trouver_un_chemin(conn):
 
 
 def Parcours_en_largeur(NodeDepart:ArretNodes, NodeArrivee:ArretNodes):
+    """
+    Parcours dans le graphe de nodes afin de trouver un chemin entre NodeDepart et NodeArrivee
+
+    :param NodeDepart: ArretNodes de départ
+    :param NodeArrivee: ArretNodes d'arrivée
+    """
     f = File()
     f.enfiler([NodeDepart,0,[NodeDepart]])
     NodeDepart.marquer()
@@ -101,6 +113,13 @@ def Parcours_en_largeur(NodeDepart:ArretNodes, NodeArrivee:ArretNodes):
     return []
 
 def Construire_graph(conn:sqlite3.Connection, ArretDepart:str, ArretArrivee:str):
+    """
+    Méthode de construction du graphe des arrêts et récuperation des Nodes de départ et d'arrivée
+
+    :param conn: Connexion à la base de données
+    :param ArretDepart: Nom de l'arrêt point de départ
+    :param ArretArrivee: Nom de l'arrêt arrivée
+    """
     node_dict = {}
     cur = conn.cursor()
     NodeDepart = None
@@ -145,3 +164,47 @@ def Construire_graph(conn:sqlite3.Connection, ArretDepart:str, ArretArrivee:str)
             node_b = node_dict[arrets[1]]
             node_a.ajouter_voisin(node_b)
     return NodeDepart,NodeArrivee
+
+def Information_sur_un_arret(conn:sqlite3.Connection):
+    cur = conn.cursor()
+    # récuperation de la liste des arrêts et de leurs adresses 
+    requete = """
+                    SELECT nom_arret, adresse_arret
+                    FROM Arrets;"""
+    print(requete)
+    cur.execute(requete)
+    rows = cur.fetchall()
+    # Récuperation des noms des attributs
+    header = [col[0] for col in cur.description]
+    # Formatage des données
+    data = [list(t) for t in rows]
+    string_data = [[str(element) for element in row] for row in data]
+    layout = [[sg.Text("Cliquez sur un arrêt pour recevoir des informations")],
+                [sg.Table(values = string_data,
+                headings=header,
+                justification='center',
+                font=("_",12),
+                key='-TABLE-',
+                enable_click_events=True,
+                auto_size_columns=True)],
+            [sg.Cancel('Retour',size=(10,1))]]
+    window = sg.Window("RESULT", layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Retour': # quit
+            break
+        # Vérification de la validité des données
+        if event[0] == '-TABLE-' and event[2][0] != None and event[2][0] >= 0:
+            nom_arret = string_data[event[2][0]][0]
+            requete = f"""
+                    SELECT A.nom_ligne, CASE WHEN A.prochain_depart_en_minute == 0 THEN 'IMMINENT'
+                        ELSE A.prochain_depart_en_minute END AS prochain_depart_en_minute, 
+                        IFNULL(B.nom_arret,'TERMINUS') AS prochain_arret,
+                        arrive_ligne AS en_direction_de
+                    FROM Etapes A LEFT JOIN Etapes B ON(A.nom_ligne = B.nom_ligne AND A.rang_etape = B.rang_etape - 1)
+                    JOIN Lignes USING(nom_ligne)
+                    WHERE  A.nom_arret = "{nom_arret}";"""
+            window.Hide()
+            Afficher_table(conn,requete)
+            window.UnHide()
+    window.close()

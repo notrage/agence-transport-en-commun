@@ -56,6 +56,7 @@ def admin_panel(conn:sqlite3.Connection):
                 [sg.Button("Ajouter un arrêt",size=(50,1))],
                 [sg.Button("Supprimer un arrêt",size=(50,1))],
                 [sg.Button("Modifier une ligne",size=(50,1))],
+                [sg.Button("Verifier les effectifs",size=(50,1))],
                 [sg.Text("")],
                 [sg.Button("Réinitialiser la base de données",size=(50,1))],
 
@@ -106,6 +107,21 @@ def admin_panel(conn:sqlite3.Connection):
             window.Hide()
             Modifier_une_ligne(conn)
             window.UnHide()  
+        if event == "Verifier les effectifs":
+            window.Hide()
+            requete = """WITH Effectifs AS (
+                            SELECT type_modele, COUNT(DISTINCT numero_vehicule) AS nombre_de_vehicules, COUNT(DISTINCT matricule_conducteur) AS nombre_de_conducteurs
+                            FROM Vehicules JOIN ConducteursModeles USING(type_modele)
+                            GROUP BY type_modele)
+                        SELECT type_modele, nombre_de_vehicules, nombre_de_conducteurs, 
+                            CASE WHEN nombre_de_vehicules > nombre_de_conducteurs THEN 'SOUS-EFFECTIF DE CONDUCTEURS'
+                                WHEN nombre_de_vehicules < nombre_de_conducteurs THEN 'SUR-EFFECTIF de CONDUCTEURS'
+                                ELSE 'EFFECTIF IDEAL' END AS verficiation_effectif,
+                            nombre_de_vehicules - nombre_de_conducteurs AS difference
+                        FROM Effectifs"""
+            print(requete)
+            Afficher_table(conn,requete)
+            window.UnHide()  
         if event == "Réinitialiser la base de données":
             db.mise_a_jour_bd(conn,"data/transports_init.sql")
             db.mise_a_jour_bd(conn, "data/transports_mtag_values.sql")
@@ -152,7 +168,7 @@ def user_panel(conn:sqlite3.Connection):
     # All the stuff inside your window.
     layout = [  [sg.Button("Trouver un parcours",size=(50,1))],
                 [sg.Button("Informations sur un arrêt",size=(50,1))],
-                [sg.Button("...",size=(50,1))],
+                [sg.Button("Informations sur un tarif",size=(50,1))],
                 [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (150, 10)))]
             ]
     window = sg.Window('USER', layout)
@@ -168,6 +184,10 @@ def user_panel(conn:sqlite3.Connection):
         if event == "Informations sur un arrêt":
             window.Hide()
             Information_sur_un_arret(conn)
+            window.UnHide()
+        if event == "Informations sur un tarif":
+            window.Hide()
+            Information_sur_un_tarif(conn)
             window.UnHide()
     window.close()
 

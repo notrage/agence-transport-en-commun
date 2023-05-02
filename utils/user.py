@@ -166,6 +166,11 @@ def Construire_graph(conn:sqlite3.Connection, ArretDepart:str, ArretArrivee:str)
     return NodeDepart,NodeArrivee
 
 def Information_sur_un_arret(conn:sqlite3.Connection):
+    """
+    Formulaire de selection d'un arrêt pour recevoir des informations supplémentaires
+
+    :param conn: Connexion à la base de données
+    """
     cur = conn.cursor()
     # récuperation de la liste des arrêts et de leurs adresses 
     requete = """
@@ -204,6 +209,56 @@ def Information_sur_un_arret(conn:sqlite3.Connection):
                     FROM Etapes A LEFT JOIN Etapes B ON(A.nom_ligne = B.nom_ligne AND A.rang_etape = B.rang_etape - 1)
                     JOIN Lignes USING(nom_ligne)
                     WHERE  A.nom_arret = "{nom_arret}";"""
+            window.Hide()
+            Afficher_table(conn,requete)
+            window.UnHide()
+    window.close()
+
+
+
+def Information_sur_un_tarif(conn:sqlite3.Connection):
+    """
+    Formulaire de selection d'un tarif
+
+    :param conn: Connexion à la base de données
+    """ 
+    cur = conn.cursor()
+    # récuperation de la liste de type de véhicule présente dans les tarifs
+    requete = """
+                    SELECT DISTINCT(type_modele)
+                    FROM Tarifs;"""
+    print(requete)
+    cur.execute(requete)
+    liste_type_vehicule = [str(t[0]) for t in cur.fetchall()]
+    radio_liste_type_vehicule = [sg.Radio(x,'R1',key=f"{x}") for x in liste_type_vehicule]
+    requete = """
+                    SELECT DISTINCT(duree_tarif)
+                    FROM Tarifs;"""
+    print(requete)
+    cur.execute(requete)
+    liste_duree = [str(t[0]) for t in cur.fetchall()]
+    radio_liste_duree = [sg.Radio(x,'R2',key=f"{x}") for x in liste_duree]
+    layout =   [radio_liste_type_vehicule,
+                radio_liste_duree,
+                [sg.Submit('Valider',size=(15,1)), sg.Cancel('Retour',size=(15,1))]]
+    window = sg.Window('ADMIN PANEL', layout)
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Retour': # quit
+            break
+        if event == 'Valider':
+            type_vehicule = None 
+            duree = None 
+            for key,value in values.items():
+                if value and key in liste_type_vehicule:
+                    type_vehicule = key
+                if value and key in liste_duree:
+                    duree = key
+            requete = f"""
+                    SELECT DISTINCT nom_ligne AS liste_ligne_desservie, prix_tarif AS prix
+                    FROM Tarifs JOIN Vehicules USING(type_modele)
+                    WHERE type_modele = "{type_vehicule}" AND duree_tarif = "{duree}";"""
+            print(requete)
             window.Hide()
             Afficher_table(conn,requete)
             window.UnHide()

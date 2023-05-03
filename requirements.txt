@@ -1,2 +1,1 @@
-sqlite3
-PySimpleGUI
+pysimplegui==4.60.4

@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 try:
     import PySimpleGUI as sg
 except:
@@ -14,7 +13,7 @@ from utils.user import *
 
 def main_screen(conn:sqlite3.Connection):
     """
-    Menu de base
+    Menu initiale pour choisir la connection en temps qu'administrateur ou que simple utilisateur
 
     :param conn: Connexion à la base de données
     """
@@ -193,6 +192,9 @@ def user_panel(conn:sqlite3.Connection):
 
 
 def main():
+    """
+    Ouverture de la BDD, préparation des UIs, et appel du menu principal
+    """
     # Nom de la BD à créer
     db_file = "data/transports.db"
 

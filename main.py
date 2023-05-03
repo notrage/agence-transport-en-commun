@@ -108,18 +108,7 @@ def admin_panel(conn:sqlite3.Connection):
             window.UnHide()  
         if event == "Verifier les effectifs":
             window.Hide()
-            requete = """WITH Effectifs AS (
-                            SELECT type_modele, COUNT(DISTINCT numero_vehicule) AS nombre_de_vehicules, COUNT(DISTINCT matricule_conducteur) AS nombre_de_conducteurs
-                            FROM Vehicules JOIN ConducteursModeles USING(type_modele)
-                            GROUP BY type_modele)
-                        SELECT type_modele, nombre_de_vehicules, nombre_de_conducteurs, 
-                            CASE WHEN nombre_de_vehicules > nombre_de_conducteurs THEN 'SOUS-EFFECTIF DE CONDUCTEURS'
-                                WHEN nombre_de_vehicules < nombre_de_conducteurs THEN 'SUR-EFFECTIF de CONDUCTEURS'
-                                ELSE 'EFFECTIF IDEAL' END AS verficiation_effectif,
-                            nombre_de_vehicules - nombre_de_conducteurs AS difference
-                        FROM Effectifs"""
-            print(requete)
-            Afficher_table(conn,requete)
+            Verifier_les_effectifs(conn)
             window.UnHide()  
         if event == "Réinitialiser la base de données":
             db.mise_a_jour_bd(conn,"data/transports_init.sql")

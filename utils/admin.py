@@ -1,6 +1,8 @@
 import PySimpleGUI as sg
 import sqlite3
 
+from utils.requete import Requete
+
 
 def Ajouter_un_conducteur(conn:sqlite3.Connection):
     """
@@ -27,38 +29,14 @@ def Ajouter_un_conducteur(conn:sqlite3.Connection):
             if not nom.strip() == '' and not prenom.strip() == '':
                 # Verification que bus et/ou tram est coché
                 if bus or tram:
-                    cur = conn.cursor()
-
-                    # Récuperation du premier matricule disponible
-                    requete = """WITH FreeMat AS (
-                                    SELECT A.matricule_conducteur AS matricule_conducteur,B.matricule_conducteur AS NullMat
-                                    FROM Conducteurs A LEFT JOIN Conducteurs B ON (A.matricule_conducteur = B.matricule_conducteur - 1)
-                                )
-                                SELECT MIN(matricule_conducteur + 1)	
-                                FROM FreeMat
-                                WHERE NullMat IS NULL;"""
-                    print(requete)
-                    cur.execute(requete)
+                    requete: Requete = Requete(conn)
+                    cur = requete.select_min_mat_conducteur()
                     rows = cur.fetchall()
                     mat = str(rows[0][0])
-                    # Execution du SQL 
-                    requete = "INSERT INTO Conducteurs VALUES (" + mat +",'" + nom + "','" + prenom +"');"
-                    print(requete)
-                    try:
-                        cur.execute(requete)
-                    except sqlite3.IntegrityError:
-                        sg.Popup("Erreur : matricule non disponible")
-                    else:
-                        if bus: 
-                            requete = "INSERT INTO ConducteursModeles VALUES (" + mat +",'Bus');"
-                            print(requete)
-                            cur.execute(requete)
-                        if tram: 
-                            requete = "INSERT INTO ConducteursModeles VALUES (" + mat +",'Tram');"
-                            print(requete)
-                            cur.execute(requete)
-                        sg.Popup("Ajout validé !")
-                        conn.commit()
+                    # Execution du SQL
+                    requete.insert_conducteur(mat, nom, prenom, bus, tram)
+                    sg.Popup("Ajout validé !")
+                    conn.commit()
                 else:
                     sg.Popup("Erreur : le conducteur doit pouvoir conduire un tram et/ou un bus")
             else:
@@ -84,34 +62,17 @@ def Ajouter_un_vehicule(conn:sqlite3.Connection):
         if event == 'Valider':
             ligne,bus,tram = values['-IMPUT_LIGNE-'],values['-CK_BUS-'],values['-CK_TRAM-']
             if not ligne.strip() == '':
-                if (bus or tram) and not (bus and tram):
+                if (bus or tram):
                     # Récuperation du premier numéro de bus disponible
-                    cur = conn.cursor()
-                    requete = """WITH FreeNum AS (
-                                    SELECT A.numero_vehicule AS numero_vehicule,B.numero_vehicule AS NullNum
-                                    FROM Vehicules A LEFT JOIN Vehicules B ON (A.numero_vehicule = B.numero_vehicule - 1)
-                                )
-                                SELECT MIN(numero_vehicule + 1)	
-                                FROM FreeNum
-                                WHERE NullNum IS NULL;"""
-                    print(requete)
-                    cur.execute(requete)
+                    requete: Requete = Requete(conn)
+                    cur = requete.select_min_num_vehicule()
                     rows = cur.fetchall()
                     num = str(rows[0][0])
-                    if bus:
-                        requete = f"INSERT INTO Vehicules VALUES ({num},'Bus','{ligne}');"
-                    if tram:
-                        requete = "INSERT INTO Vehicules VALUES (" + num +",'Tram','" + ligne + "');"
-                    print(requete)
-                    try:
-                        cur.execute(requete)
-                    except sqlite3.IntegrityError:
-                        sg.popup("Erreur : le numéro de véhicule n'est pas disponible et/ou la ligne n'existe pas.")
-                    else:
-                        sg.Popup("Ajout validé !")
-                        conn.commit()
+                    requete.insert_vehicule(num, bus, tram, ligne)
+                    sg.Popup("Ajout validé !")
+                    conn.commit()
                 else:
-                    sg.Popup("Erreur : le véhicule doit être un bus OU un tram")
+                    sg.Popup("Erreur : le type de véhicule doit être définit")
             else:
                 sg.Popup("Erreur : le nom de la ligne ne doit pas être vide")
     window.close()
@@ -137,15 +98,12 @@ def Ajouter_un_arret(conn:sqlite3.Connection):
             nom,adr = values["-IMPUT_NOM-"],values["-IMPUT_ADR-"]
             if not nom.strip() == '':
                 if not adr.strip() == '':
-                    cur = conn.cursor()
-                    requete = f'INSERT INTO Arrets VALUES ("{nom}","{adr}");'
-                    print(requete)
-                    try:
-                        cur.execute(requete)
-                    except sqlite3.IntegrityError:
+                    requete: Requete = Requete(conn)
+                    valide = requete.insert_arret(nom, adr)
+                    if not valide:
                         sg.popup("Erreur : l'arrêt existe déjà.")
-                    else:
-                        sg.Popup("Ajout validé !")
+                    else: 
+                        sg.popup("Ajout validé !")
                         conn.commit()
                 else:
                     sg.Popup("Erreur :  l'adresse ne doit pas être vide")
@@ -154,16 +112,13 @@ def Ajouter_un_arret(conn:sqlite3.Connection):
     window.close()
 
 
-def Afficher_table(conn:sqlite3.Connection,requete: str) -> None:
+def Afficher_table(cur: sqlite3.Cursor) -> None:
     """
     Affiche la table obtenu par la requete
 
     :param conn: Connexion à la base de données
     :param requete: requete à executer
     """
-    cur = conn.cursor()
-    print(requete)
-    cur.execute(requete)
     rows = cur.fetchall()
     # Récuperation des noms des attributs
     header = [col[0] for col in cur.description]
@@ -196,9 +151,8 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
     :return bool: Indique si il faut recharger la page pour mettre à jour les données en cas de supression.
     """
     # Récuperation des données
-    cur = conn.cursor()
-    requete = "SELECT * FROM " + table + ";"
-    cur.execute(requete)
+    requete: Requete = Requete(conn)
+    cur = requete.select_all_from(table)
     rows = cur.fetchall()
     # Récuperation des noms des attributs
     header = [col[0] for col in cur.description]
@@ -227,13 +181,8 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
             button = sg.popup(popup_str, button_type=1)
             if button == 'Yes':
                 # DELETE ConducteursModeles
-                requete = "DELETE FROM ConducteursModeles WHERE matricule_conducteur == " + string_data[event[2][0]][0] + ";"
-                print(requete)
-                cur.execute(requete)
+                requete.delete_conducteur(string_data[event[2][0]][0])
                 # DELETE Conducteurs
-                requete = "DELETE FROM Conducteurs WHERE matricule_conducteur == " + string_data[event[2][0]][0] + ";"
-                print(requete)
-                cur.execute(requete)
                 conn.commit()
                 # Mise à jour visuelle
                 window.close()
@@ -243,9 +192,7 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
             button = sg.popup(popup_str, button_type=1)
             if button == 'Yes':
                 # DELETE Vehicules
-                requete = "DELETE FROM Vehicules WHERE numero_vehicule == " + string_data[event[2][0]][0] + ";"
-                print(requete)
-                cur.execute(requete)
+                requete.delete_vehicule(string_data[event[2][0]][0])
                 # Mise à jour visuelle
                 conn.commit()
                 window.close()
@@ -257,30 +204,7 @@ def Supprimer_une_valeur(conn:sqlite3.Connection,table:str) -> bool:
             if button == 'Yes':
                 # DELETE Etapes + Décalage des etapes concernées 
                 # Recuperation des lignes concernés ainsi que des rang :
-                requete = f"""  
-                                SELECT nom_ligne, rang_etape FROM 
-                                Etapes WHERE nom_arret == "{nom_arret}";"""
-                print(requete)
-                cur.execute(requete)
-                rows = cur.fetchall()
-                # Décalage des numéros d'etapes sur chaque ligne
-                for (ligne,etape) in rows:
-                    requete = f"""  
-                                    UPDATE EtapesBase 
-                                    SET rang_etape = rang_etape - 1 
-                                    WHERE nom_ligne == "{ligne}" AND rang_etape > {etape};"""
-                    print(requete)
-                    cur.execute(requete)
-                requete = f"""  
-                                DELETE FROM EtapesBase 
-                                WHERE nom_arret == "{nom_arret}";"""
-                print(requete)
-                cur.execute(requete)
-                requete = f"""  
-                                DELETE FROM Arrets 
-                                WHERE nom_arret == "{nom_arret}";"""
-                print(requete)
-                cur.execute(requete)    
+                requete.delete_arret(nom_arret)
                 conn.commit()
                 window.close()
                 return True
@@ -299,14 +223,8 @@ def Supprimer_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
     :return bool: Indique si il faut recharger la page pour mettre à jour les données en cas de supression.
     """
     # Récuperation des arret de la ligne voulue
-    cur = conn.cursor()
-    requete = f"""
-                SELECT nom_arret,rang_etape
-                FROM Etapes 
-                WHERE nom_ligne = "{nom_ligne}"
-                ORDER BY rang_etape;"""
-    print(requete)
-    cur.execute(requete)
+    requete: Requete = Requete(conn)
+    cur = requete.select_from_etapesbase_nom_arret_rang_etape_where_nom_ligne(nom_ligne)
     rows = cur.fetchall()
     # Récuperation des noms des attributs
     header = [col[0] for col in cur.description]
@@ -334,17 +252,8 @@ def Supprimer_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
             popup_str = f"Voulez-vous supprimer l'arret {nom_arret} de la ligne {nom_ligne} ?"
             button = sg.popup(popup_str, button_type=1)
             if button == 'Yes':
-                requete = f"""  
-                                UPDATE EtapesBase
-                                SET rang_etape = rang_etape - 1 
-                                WHERE nom_ligne == "{nom_ligne}" AND rang_etape > {rang_etape};"""
-                print(requete)
-                cur.execute(requete)
-                requete = f"""  
-                                DELETE FROM EtapesBase 
-                                WHERE nom_arret == "{nom_arret}" AND nom_ligne == "{nom_ligne}";"""
-                print(requete)
-                cur.execute(requete)
+                requete.update_etapesbase_rang_etape_where_ligne_and_rang_etape_greater_or_equal(nom_ligne, rang_etape)
+                requete.delete_etapesbase_where_nom_arret_and_nom_ligne(nom_arret, nom_ligne)
                 conn.commit()
                 window.close()
                 return True
@@ -361,26 +270,11 @@ def Ajouter_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
     """
     cur = conn.cursor()
     # Récuperer le rang d'etape max de la ligne
-    requete = f"""  SELECT MAX(rang_etape)
-                    FROM Etapes
-                    WHERE nom_ligne = "{nom_ligne}";
-                """
-    print(requete)
-    cur.execute(requete)
+    requete: Requete = Requete(conn)
+    cur = requete.select_from_etapes_max_rang_etape_where_nom_ligne(nom_ligne)
     rang_max = cur.fetchall()[0][0]
     # Récuperer les arrêts disponibles
-    
-    requete = f"""
-                    SELECT nom_arret 
-                    FROM Arrets
-                    EXCEPT
-                    SELECT nom_arret
-                    FROM Etapes
-                    WHERE nom_ligne = "{nom_ligne}";
-                """
-
-    print(requete)
-    cur.execute(requete)
+    cur = requete.select_from_arrets_nom_arret_exept_in_etapes_where_nom_ligne(nom_ligne)
     rows = cur.fetchall()
     # Récuperation des noms des attributs
     header = [col[0] for col in cur.description]
@@ -408,16 +302,8 @@ def Ajouter_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
                 if values['-RANG-'].isdigit() and int(values['-RANG-']) >= 1 and int(values['-RANG-']) <= rang_max+1:
                     nom_arret = string_data[values['-TABLE-'][0]][0]
                     rang_etape = values['-RANG-']
-                    requete = f"""
-                                UPDATE EtapesBase 
-                                SET rang_etape = rang_etape + 1 
-                                WHERE nom_ligne == "{nom_ligne}" AND rang_etape >= {rang_etape};"""
-                    print(requete)
-                    cur.execute(requete)
-                    requete = f"""
-                                INSERT INTO EtapesBase VALUES ("{nom_ligne}","{nom_arret}",{rang_etape});"""
-                    print(requete)
-                    cur.execute(requete)
+                    requete.update_etapesbase_rang_etape_where_ligne_and_rang_etape_greater_or_equal(nom_ligne, rang_etape)
+                    requete.insert_etapesbase(nom_ligne, nom_arret, rang_etape)
                     conn.commit()
                     sg.popup("Ajout validé !")
                     window.close()
@@ -430,11 +316,8 @@ def Ajouter_etape_ligne(conn:sqlite3.Connection,nom_ligne:str):
     return False
 
 def Modifier_une_ligne(conn:sqlite3.Connection):
-    cur = conn.cursor()
-    requete = """
-                    SELECT nom_ligne 
-                    FROM Lignes;"""
-    cur.execute(requete)
+    requete: Requete = Requete(conn)
+    cur = requete.select_from_lignes_nom_ligne()
     rows = cur.fetchall()
     ligne_liste = [x[0] for x in rows]
     layout = [[]]
@@ -475,23 +358,3 @@ def Modifier_une_ligne(conn:sqlite3.Connection):
                         relancer = Ajouter_etape_ligne(conn,ligne)
                     window.UnHide()  
     window.close()
-    
-
-def Verifier_les_effectifs(conn:sqlite3.Connection):
-    """
-    Récuperation des informations sur les effectifs
-
-    :param conn: Connection la bdd sqlite
-    """
-    requete = """WITH Effectifs AS (
-                            SELECT type_modele, COUNT(DISTINCT numero_vehicule) AS nombre_de_vehicules, COUNT(DISTINCT matricule_conducteur) AS nombre_de_conducteurs
-                            FROM Vehicules JOIN ConducteursModeles USING(type_modele)
-                            GROUP BY type_modele)
-                        SELECT type_modele, nombre_de_vehicules, nombre_de_conducteurs, 
-                            CASE WHEN nombre_de_vehicules > nombre_de_conducteurs THEN 'SOUS-EFFECTIF DE CONDUCTEURS'
-                                WHEN nombre_de_vehicules < nombre_de_conducteurs THEN 'SUR-EFFECTIF DE CONDUCTEURS'
-                                ELSE 'EFFECTIF IDEAL' END AS verficiation_effectif,
-                            nombre_de_vehicules - nombre_de_conducteurs AS difference
-                        FROM Effectifs"""
-    print(requete)
-    Afficher_table(conn,requete)

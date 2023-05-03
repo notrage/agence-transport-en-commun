@@ -263,3 +263,24 @@ def Information_sur_un_tarif(conn:sqlite3.Connection):
             Afficher_table(conn,requete)
             window.UnHide()
     window.close()
+    
+def Verifier_les_effectifs(conn:sqlite3.Connection):
+    """
+    Récuperation des informations sur les effectifs
+
+    :param conn: Connection la bdd sqlite
+    """
+    requete = """WITH Effectifs AS (
+                            SELECT type_modele, COUNT(DISTINCT numero_vehicule) AS nombre_de_vehicules, COUNT(DISTINCT matricule_conducteur) AS nombre_de_conducteurs
+                            FROM Vehicules JOIN ConducteursModeles USING(type_modele)
+                            GROUP BY type_modele)
+                        SELECT type_modele, nombre_de_vehicules, nombre_de_conducteurs, 
+                            CASE WHEN nombre_de_vehicules > nombre_de_conducteurs THEN 'SOUS-EFFECTIF DE CONDUCTEURS'
+                                WHEN nombre_de_vehicules < nombre_de_conducteurs THEN 'SUR-EFFECTIF DE CONDUCTEURS'
+                                ELSE 'EFFECTIF IDEAL' END AS verficiation_effectif,
+                            nombre_de_vehicules - nombre_de_conducteurs AS difference
+                        FROM Effectifs"""
+    print(requete)
+    cur = conn.cursor()
+    cur.execute(requete)
+    Afficher_table(cur)

@@ -57,6 +57,7 @@ def admin_panel(conn:sqlite3.Connection):
                 [sg.Button("Ajouter un arrêt",size=(50,1))],
                 [sg.Button("Supprimer un arrêt",size=(50,1))],
                 [sg.Button("Modifier une ligne",size=(50,1))],
+                [sg.Button("Verifier les effectifs",size=(50,1))],
                 [sg.Text("")],
                 [sg.Button("Réinitialiser la base de données",size=(50,1))],
 
@@ -107,6 +108,10 @@ def admin_panel(conn:sqlite3.Connection):
             window.Hide()
             Modifier_une_ligne(conn)
             window.UnHide()  
+        if event == "Verifier les effectifs":
+            window.Hide()
+            Verifier_les_effectifs(conn) 
+            window.UnHide()  
         if event == "Réinitialiser la base de données":
             db.mise_a_jour_bd(conn,"data/transports_init.sql")
             db.mise_a_jour_bd(conn, "data/transports_mtag_values.sql")
@@ -154,7 +159,8 @@ def user_panel(conn:sqlite3.Connection):
     # All the stuff inside your window.
     layout = [  [sg.Button("Trouver un parcours",size=(50,1))],
                 [sg.Button("Informations sur un arrêt",size=(50,1))],
-                [sg.Button("Vérifier les effectifs",size=(50,1))],
+                [sg.Button("Informations sur un tarif",size=(50,1))],
+                [sg.Text("")],
                 [sg.Button("Déconnexion",size=(15,1),pad=((5,0), (150, 10)))]
             ]
     window = sg.Window('USER', layout)
@@ -171,9 +177,9 @@ def user_panel(conn:sqlite3.Connection):
             window.Hide()
             Information_sur_un_arret(conn)
             window.UnHide()
-        if event == "Vérifier les effectifs":
+        if event == "Informations sur un tarif":
             window.Hide()
-            Verifier_les_effectifs(conn)
+            Information_sur_un_tarif(conn)
             window.UnHide()
     window.close()
 

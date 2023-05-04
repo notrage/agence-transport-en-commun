@@ -38,13 +38,9 @@ def Trouver_un_chemin(conn:sqlite3.Connection):
 
     :param conn: Connexion à la base de données
     """
-    cur = conn.cursor()
-    # récuperation de la liste des arrêts et de leurs adresses 
-    requete = """
-                    SELECT nom_arret, adresse_arret
-                    FROM Arrets;"""
-    print(requete)
-    cur.execute(requete)
+    requete: Requete = Requete(conn)
+    # Récuperation des noms des arrets
+    cur = requete.select_all_from("Arrets")
     rows = cur.fetchall()
     # Récuperation des noms des attributs
     header = [col[0] for col in cur.description]
@@ -120,16 +116,13 @@ def Construire_graph(conn:sqlite3.Connection, ArretDepart:str, ArretArrivee:str)
     :param ArretDepart: Nom de l'arrêt point de départ
     :param ArretArrivee: Nom de l'arrêt arrivée
     """
+    requete: Requete = Requete(conn)
     node_dict = {}
     cur = conn.cursor()
     NodeDepart = None
     NodeArrivee = None
     # On récupere la liste des arrêt pour créer toutes les nodes 
-    requete = """   
-                    SELECT nom_arret, nom_ligne
-                    FROM Etapes;"""
-    print(requete)
-    cur.execute(requete)
+    cur = requete.select_nom_arret_nom_ligne_from_etapes()
     # Construction de toute les nodes
     for arret in cur.fetchall():
         a = arret[0]
@@ -144,21 +137,11 @@ def Construire_graph(conn:sqlite3.Connection, ArretDepart:str, ArretArrivee:str)
     # Pour des soucis de performances (la librairie sqlite a beaucoup de mal à recuperer une grande quantité de données d'un coup)
     # Nous divisons pour chaque ligne les requetes
 
-    requete = """   
-                    SELECT nom_ligne
-                    FROM Lignes;"""
-    print(requete)
-    cur.execute(requete)
+    cur = requete.select_from_lignes_nom_ligne()
     liste_ligne = cur.fetchall()
     for ligne in liste_ligne:
         nom_ligne = ligne[0]
-        requete = f"""   
-                    SELECT A.nom_arret, B.nom_arret 
-                    FROM Etapes A 
-                    JOIN Etapes B ON (A.nom_ligne = B.nom_ligne AND 
-                                    (A.rang_etape = B.rang_etape - 1 OR A.rang_etape = B.rang_etape + 1))
-                    WHERE A.nom_ligne = "{nom_ligne}";"""
-        cur.execute(requete)
+        cur = requete.select_voisin_arret(nom_ligne)
         for arrets in cur.fetchall():
             node_a = node_dict[arrets[0]]
             node_b = node_dict[arrets[1]]
@@ -171,13 +154,9 @@ def Information_sur_un_arret(conn:sqlite3.Connection):
 
     :param conn: Connexion à la base de données
     """
-    cur = conn.cursor()
+    requete: Requete = Requete(conn)
     # récuperation de la liste des arrêts et de leurs adresses 
-    requete = """
-                    SELECT nom_arret, adresse_arret
-                    FROM Arrets;"""
-    print(requete)
-    cur.execute(requete)
+    cur = requete.select_all_from("Arrets")
     rows = cur.fetchall()
     # Récuperation des noms des attributs
     header = [col[0] for col in cur.description]
@@ -201,16 +180,9 @@ def Information_sur_un_arret(conn:sqlite3.Connection):
         # Vérification de la validité des données
         if event[0] == '-TABLE-' and event[2][0] != None and event[2][0] >= 0:
             nom_arret = string_data[event[2][0]][0]
-            requete = f"""
-                    SELECT A.nom_ligne, CASE WHEN A.prochain_depart_en_minute == 0 THEN 'IMMINENT'
-                        ELSE A.prochain_depart_en_minute END AS prochain_depart_en_minute, 
-                        IFNULL(B.nom_arret,'TERMINUS') AS prochain_arret,
-                        arrive_ligne AS en_direction_de
-                    FROM Etapes A LEFT JOIN Etapes B ON(A.nom_ligne = B.nom_ligne AND A.rang_etape = B.rang_etape - 1)
-                    JOIN Lignes USING(nom_ligne)
-                    WHERE  A.nom_arret = "{nom_arret}";"""
+            cur = requete.select_info_arret(nom_arret)
             window.Hide()
-            Afficher_table(conn,requete)
+            Afficher_table(cur)
             window.UnHide()
     window.close()
 
@@ -222,20 +194,13 @@ def Information_sur_un_tarif(conn:sqlite3.Connection):
 
     :param conn: Connexion à la base de données
     """ 
-    cur = conn.cursor()
+    requete: Requete = Requete(conn)
     # récuperation de la liste de type de véhicule présente dans les tarifs
-    requete = """
-                    SELECT DISTINCT(type_modele)
-                    FROM Tarifs;"""
-    print(requete)
-    cur.execute(requete)
+    cur = requete.select_distinct_from_tarifs("type_modele")
     liste_type_vehicule = [str(t[0]) for t in cur.fetchall()]
     radio_liste_type_vehicule = [sg.Radio(x,'R1',key=f"{x}") for x in liste_type_vehicule]
-    requete = """
-                    SELECT DISTINCT(duree_tarif)
-                    FROM Tarifs;"""
-    print(requete)
-    cur.execute(requete)
+    # récuperation de la liste des duree de tarif 
+    cur = requete.select_distinct_from_tarifs("duree_tarif")
     liste_duree = [str(t[0]) for t in cur.fetchall()]
     radio_liste_duree = [sg.Radio(x,'R2',key=f"{x}") for x in liste_duree]
     layout =   [radio_liste_type_vehicule,
@@ -254,33 +219,9 @@ def Information_sur_un_tarif(conn:sqlite3.Connection):
                     type_vehicule = key
                 if value and key in liste_duree:
                     duree = key
-            requete = f"""
-                    SELECT DISTINCT nom_ligne AS liste_ligne_desservie, prix_tarif AS prix
-                    FROM Tarifs JOIN Vehicules USING(type_modele)
-                    WHERE type_modele = "{type_vehicule}" AND duree_tarif = "{duree}";"""
-            print(requete)
+            cur = requete.select_info_tarif(type_vehicule,duree)
             window.Hide()
-            Afficher_table(conn,requete)
+            Afficher_table(cur)
             window.UnHide()
     window.close()
     
-def Verifier_les_effectifs(conn:sqlite3.Connection):
-    """
-    Récuperation des informations sur les effectifs
-
-    :param conn: Connection la bdd sqlite
-    """
-    requete = """WITH Effectifs AS (
-                            SELECT type_modele, COUNT(DISTINCT numero_vehicule) AS nombre_de_vehicules, COUNT(DISTINCT matricule_conducteur) AS nombre_de_conducteurs
-                            FROM Vehicules JOIN ConducteursModeles USING(type_modele)
-                            GROUP BY type_modele)
-                        SELECT type_modele, nombre_de_vehicules, nombre_de_conducteurs, 
-                            CASE WHEN nombre_de_vehicules > nombre_de_conducteurs THEN 'SOUS-EFFECTIF DE CONDUCTEURS'
-                                WHEN nombre_de_vehicules < nombre_de_conducteurs THEN 'SUR-EFFECTIF DE CONDUCTEURS'
-                                ELSE 'EFFECTIF IDEAL' END AS verficiation_effectif,
-                            nombre_de_vehicules - nombre_de_conducteurs AS difference
-                        FROM Effectifs"""
-    print(requete)
-    cur = conn.cursor()
-    cur.execute(requete)
-    Afficher_table(cur)

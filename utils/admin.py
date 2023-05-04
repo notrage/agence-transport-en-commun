@@ -358,3 +358,14 @@ def Modifier_une_ligne(conn:sqlite3.Connection):
                         relancer = Ajouter_etape_ligne(conn,ligne)
                     window.UnHide()  
     window.close()
+
+
+def Verifier_les_effectifs(conn:sqlite3.Connection):
+    """
+    Récuperation des informations sur les effectifs
+
+    :param conn: Connection la bdd sqlite
+    """
+    requete: Requete = Requete(conn)
+    cur = requete.select_effectif()
+    Afficher_table(cur)

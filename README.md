@@ -1,36 +1,27 @@
-# Logiciel développé en Python 3.8.10 avec les libraires sqlite3 2.6.0 et pysimplegui 4.60.4
-
-Les fonctionnalités sont divisés en 2 catégorie : administrateur, qui vont modifier la DB et/ou accéder aux données ‘confidentielles’, et une catégorie utilisateurs, qui références les données accessible à tous. 
-## Administrateur :
--Visualiser une table : visualiser n’importe quelle table ou view de la DB, on ne pourra pas visualiser les tables dites de base, soit celle dont il existe une view qui n’omets pas de données de la table initiale.
-
--Ajouter un conducteur : via un formulaire, vérifie la validité des données entrées par l’administrateur (nom, prenom, conduit bus et/ou tram) avant d’essayer d’exécuter la requête, assigne lui même le premier matricule disponible au nouveau conducteur pour éviter des erreurs de primary key, puis exécute une requête insert dans Conducteurs puis ConducteursModeles paramétrées avec les valeurs du formulaire. 
-
--Supprimer un conducteur : affiche la liste des conducteurs, et permet de cliquer sur un conducteurs afin de le supprimer de la table ConducteursModeles puis de la table Conducteurs pour respecter les contraintes d’intégrités référentielles. 
-
--Ajouter un véhicule : via un formulaire , vérifie la validité des données entrées par l’administrateur (tram ou bus, ligne desservie) avant d’essayer d’exécuter la requête, assigne lui même le premier numéro disponible pour éviter des erreurs de primary key, puis exécute une requête insert dans Vehicules paramétrées avec les valeurs du formulaire. 
-
--Supprimer un véhicule : affiche la liste des véhicules, et permet de cliquer sur un véhicule  afin de le supprimer de la table Vehicules
-
--Ajouter un arrêt : via un formulaire,  via un formulaire, vérifie la validité des données entrées par l’administrateur (nom de l’arrêt disponible, adresse) puis exécute une requête insert paramétrées avec les valeurs du formulaire. 
-
--Supprimer un arrêt : affiche la liste des arrêts, et permet de cliquer sur un arrêt afin de le supprimer de la table Etapes, en décrémentant tout les rangs des étapes étant sur la même ligne que l’arrêt supprimer et ayant un rang supérieur à cet arrêt, puis supprimer de l’arrêt de la table Arrets. 
-
--Modifier une ligne : via un formulaire, sélectionner la ligne à modifier, et si on souhaite ajouter ou supprimer un arrêt de la ligne.
-	Ajout : liste les arrêts n’apparaissant pas encore dans la ligne, et la liste 	des rangs d’étapes disponible, et permet l’ajout de l’arrêt sélectionner au 	rang voulu en incrémentant tout les autres rang d’arrêts de la même ligne 	supérieur à celui ajouté.
-	Suppression : liste les arrêts de la ligne et leur rang, et permet de cliquer 	sur l’arrêt voulu afin de le supprimer de la table Etapes, puis décrémente 	tout les autres rang d’arrêts de la même ligne inférieur à celui supprimé.
-
--Vérifier les effectifs : requête affichant le nombre de véhicule et de conducteur par type de véhicule, puis nous dis donc si il y a un manque ou un surplus d’effectif, et leur différence. 
-
--Réinitialiser la base de donnée : réinitialise toute la base de données et insert les valeurs initiales, soit celle du fichier transports_mtag_values.sql 
-
-## Utilisateurs :
--Trouver un parcours : permet à l’utilisateur de sélectionner un arrêt de départ et un arrêt d’arriver, puis construit le graphe avec tout les arrêts relier uniquement à leur voisin d’étapes, puis effectue un parcours en largeur afin de trouver le chemin le plus court entre l’arrêt de départ et celui d’arrivée. 
-Limite : nous n’avons pas la distance/durée entre les arrêts, donc le graphe n’est pas pondéré, donc on ne calcul par le chemin le plus rapide, mais le plus court en nombre d’arrêt. 
-
--Informations sur un arrêt : affiche la liste des arrêts et leur adresse, et permet à l’utilisateur de cliquer sur l’un d’entre eux afin d’avoir des informations supplémentaires tel que :
-	-le nom des lignes qui le desservent, 
-	-le temps avant le prochain départ de cet arrêt,
-	-le prochain arrêt,
-	-le terminus de la ligne
-- Informations sur un tarif : génère un formulaire pour sélectionner le tarif souhaiter en fonction des différents modeles de véhicule et durée des tarifs, puis affiche le prix ainsi que les lignes accessibles avec cette tarification
+# Public Transit Agency
+This is a university project that aim to create manage a public transit agency using the database in a python gui, this software is developped in Python 3.8.10 with the booksellers sqllite 2.6.0 and pysimplegui 4.60.4
+## How to use ?
+- First of all you need to clone this git repository `git clone git@github.com:notrage/public-transit-agency.git`
+- You will need to install the **pysimplegui** module as the requirement says
+- Finally you will have to run the **public-transit-agency** using a 3.8.10 python version : `python3 main.py`
+## All these features
+The features are divided into 2 categories: administrator, who will modify the DB and/or access 'confidential' data, and a user category, which references the data accessible to all.
+### Administrator:
+- Visualize a table: view any table or view of the DB, we will not be able to view the so-called basic tables, i.e. the one for which there is a view that does not omit data from the initial table.
+- Add a driver: via a form, check the validity of the data entered by the administrator (name, surname, bus and/or tram driver) before trying to execute the request, assign the first available number to the new driver to avoid primary key errors, then execute an insert request in Drivers and then DriversModels parameterized with the values of the form.
+- Delete Driver: Displays the list of drivers, and allows you to click on a conductor to remove it from the DriversModels table and then from the Drivers table to respect the referential integrity constraints.
+- Add a vehicle: via a form, check the validity of the data entered by the administrator (tram or bus, line served) before trying to execute the request, assign the first available number himself to avoid primary key errors, then execute an insert request in Vehicles parameterized with the values of the form.
+- Delete Vehicle: Displays the list of vehicles, and allows you to click on a vehicle to remove it from the Vehicles table
+- Add a stop: via a form, via a form, check the validity of the data entered by the administrator (name of the available stop, address) and then execute an insert query parameterized with the values of the form.
+- Delete Stop: Displays the list of stops, and allows you to click on a stop in order to remove it from the Steps table, decrementing all the ranks of the steps that are on the same row as the Delete stop and have a higher rank than that stop, and then remove from the stop from the Stops table.
+- Edit a line: via a form, select the line to be modified, and if you want to add or remove a stop from the line. Add: lists the stops that do not yet appear in the row, and the list of available step ranks, and allows the addition of the selected stop to the desired rank by incrementing all the other order of stops in the same row greater than the one added. Deletion: lists the stops in the row and their ranks, and allows you to click on the desired stop to remove it from the Steps table, then decrements all other rows of stops in the same row less than the deleted one.
+- Check the workforce: query displaying the number of vehicles and drivers by type of vehicle, then tell us if there is a shortage or a surplus of staff, and their difference.
+- Reset database: resets the entire database and inserts the initial values, i.e. the value of the transports_mtag_values.sql file
+### Users:
+- Find a route: allows the user to select a start stop and an arrival stop, then construct the graph with all the stops linked only to their neighbour of stages, then performs a journey in width in order to find the shortest path between the start and end stop. Limit: we don't have the distance/duration between stops, so the graph is not weighted, so we don't calculate the fastest path, but the shortest in number of stops.
+- Stop Information: displays the list of stops and their addresses, and allows the user to click on one of them in order to have additional information such as:
+	- the names of the lines that serve it,
+	- the time before the next departure from this stop,
+	- the next stop,
+	- the terminus of the line
+- Rate Information: Generates a form to select the desired rate based on different vehicle models and rate duration, then displays the price and the lines available with that rate

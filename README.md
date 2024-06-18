@@ -3,7 +3,7 @@ This is a university (in collaboration with [Thomas Civade](https://github.com/L
 ## How to use ?
 - First of all you need to clone this git repository `git clone git@github.com:notrage/public-transit-agency.git`
 - You will need to install the **pysimplegui** module as the requirement says
-- Finally you will have to run the **public-transit-agency** using a 3.8.10 python version : `python3 main.py`
+- Finally you will have to run the **public-transit-agency** using a 3.8.10 python version : `python3 public_transit_agency.py`
 ## All these features
 The features are divided into 2 categories: administrator, who will modify the DB and/or access 'confidential' data, and a user category, which references the data accessible to all.
 ### Administrator:

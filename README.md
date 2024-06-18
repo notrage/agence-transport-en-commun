@@ -1,5 +1,5 @@
 # Public Transit Agency
-This is a university project that aim to create manage a public transit agency using the database in a python gui, this software is developped in Python 3.8.10 with the booksellers sqllite 2.6.0 and pysimplegui 4.60.4
+This is a university (in collaboration with [Thomas Civade](https://github.com/Luminosaa)) project that aim to create manage a public transit agency using the database in a python gui, this software is developped in Python 3.8.10 with the booksellers sqllite 2.6.0 and pysimplegui 4.60.4
 ## How to use ?
 - First of all you need to clone this git repository `git clone git@github.com:notrage/public-transit-agency.git`
 - You will need to install the **pysimplegui** module as the requirement says

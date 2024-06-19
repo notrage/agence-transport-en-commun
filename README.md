@@ -1,9 +1,20 @@
 # Public Transit Agency
-This is a university (in collaboration with [Thomas Civade](https://github.com/Luminosaa)) project that aim to create manage a public transit agency using the database in a python gui, this software is developped in Python 3.8.10 with the booksellers sqllite 2.6.0 and pysimplegui 4.60.4
-## How to use ?
-- First of all you need to clone this git repository `git clone git@github.com:notrage/public-transit-agency.git`
-- You will need to install the **pysimplegui** module as the requirement says
-- Finally you will have to run the **public-transit-agency** using a 3.8.10 python version : `python3 public_transit_agency.py`
+This is a university (in collaboration with [Thomas Civade](https://github.com/Luminosaa)) project that aim to create manage a public transit agency using the database in a python gui.
+## Installation
+To run the Public Transit Agency on your local machine, make sure you have Python 3.8.10 with the booksellers sqllite 2.6.0 and pysimplegui 4.60.4 installed.
+1. Clone this git repository :
+```bash
+git clone git@github.com:notrage/public-transit-agency.git
+```
+2. Run the **Public Transit Agency** : 
+```bash
+python3 public_transit_agency.py
+```
+or
+```bash
+python public_transit_agency.py
+```
+If you only have one Python version on your machine.
 ## All these features
 The features are divided into 2 categories: administrator, who will modify the DB and/or access 'confidential' data, and a user category, which references the data accessible to all.
 ### Administrator:

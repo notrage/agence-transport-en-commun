@@ -6,7 +6,7 @@ To run the Public Transit Agency on your local machine, make sure you have Pytho
 ```bash
 git clone git@github.com:notrage/public-transit-agency.git
 ```
-2. Run the **Public Transit Agency** : 
+2. Run the Public Transit Agency : 
 ```bash
 python3 public_transit_agency.py
 ```
